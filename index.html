@@ -496,25 +496,28 @@
       align-items:center;
       justify-content:center;
     ">
-      <!-- ЗАМЕНИ src на YouTube embed когда запишешь screencast -->
-      <!-- <iframe width="100%" height="100%" style="position:absolute;inset:0;border:none;"
-        src="https://www.youtube.com/embed/ТВОЙ_VIDEO_ID?autoplay=0&rel=0&modestbranding=1"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
-        allowfullscreen></iframe> -->
-
-      <!-- Placeholder до записи видео -->
-      <div style="text-align:center;padding:40px;">
-        <div style="font-family:var(--mono);font-size:13px;color:var(--text-dim);margin-bottom:16px;">
-          <span style="color:var(--green);">●</span> REC &nbsp;·&nbsp; live production logs
-        </div>
-        <div class="terminal" style="text-align:left;font-size:12px;max-width:480px;margin:0 auto 20px;">
+      <!-- Kling AI atmospheric promo -->
+      <video
+        src="media/video.mp4"
+        autoplay
+        muted
+        loop
+        playsinline
+        style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
+      ></video>
+      <!-- overlay gradient so terminal log below is readable -->
+      <div style="
+        position:absolute;inset:0;
+        background:linear-gradient(to top, rgba(11,15,20,0.85) 0%, rgba(11,15,20,0.2) 60%, rgba(11,15,20,0.0) 100%);
+        pointer-events:none;
+      "></div>
+      <!-- bottom log overlay -->
+      <div style="position:absolute;bottom:20px;left:20px;right:20px;">
+        <div class="terminal" style="text-align:left;font-size:12px;background:rgba(11,15,20,0.7);backdrop-filter:blur(4px);">
           <span class="log-line"><span class="ts">[03:26:51]</span> <span class="warn">WARN </span> <span class="msg">Orders: 100. No SL detected.</span></span>
           <span class="log-line"><span class="ts">[03:26:52]</span> <span class="err">ERROR</span> <span class="msg">Equity drop: −18.4% in 3m</span></span>
           <span class="log-line"><span class="ts">[03:26:53]</span> <span class="info">INFO </span> <span class="msg">Ghost Log: 608/753 blocked → loss</span></span>
         </div>
-        <p style="font-family:var(--mono);font-size:12px;color:var(--text-dim);">
-          Screencast скоро появится здесь
-        </p>
       </div>
     </div>
   </div>
