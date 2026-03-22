@@ -3,240 +3,291 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Beyond the Signal — Course Dashboard</title>
+  <title>Beyond the Signal — Lab</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:       #0b0f14;
-      --bg-card:  #131920;
-      --bg-code:  #0d1117;
-      --border:   #21262d;
-      --text:     #e6edf3;
-      --dim:      #7d8590;
-      --green:    #3fb950;
-      --red:      #f85149;
-      --yellow:   #d29922;
-      --blue:     #58a6ff;
-      --purple:   #bc8cff;
-      --mono:     'JetBrains Mono', monospace;
-      --sans:     'Inter', system-ui, sans-serif;
-      --sidebar:  260px;
+      --bg:      #0b0f14;
+      --bg-card: #131920;
+      --bg-code: #0d1117;
+      --border:  #21262d;
+      --text:    #e6edf3;
+      --dim:     #7d8590;
+      --green:   #3fb950;
+      --red:     #f85149;
+      --yellow:  #d29922;
+      --blue:    #58a6ff;
+      --purple:  #bc8cff;
+      --mono:    'JetBrains Mono', monospace;
+      --sans:    'Inter', system-ui, sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    html, body { height: 100%; overflow: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; display: flex; flex-direction: column; }
 
-    /* ── TOP BAR ──────────────────────────── */
-    .topbar {
-      height: 48px;
-      background: var(--bg-code);
+    /* ══ STATUS BAR (top) ══════════════════════════════════════ */
+    .statusbar {
+      height: 36px;
+      background: #040810;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      flex-shrink: 0;
-      z-index: 10;
-    }
-    .topbar-brand {
+      padding: 0 16px;
+      gap: 0;
       font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-    }
-    .topbar-brand span { color: var(--green); }
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-family: var(--mono);
-      font-size: 12px;
+      font-size: 11px;
       color: var(--dim);
-    }
-    .progress-bar {
-      width: 120px;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
+      flex-shrink: 0;
       overflow: hidden;
     }
-    .progress-fill {
+    .sb-segment {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 14px;
       height: 100%;
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .sb-segment:first-child { padding-left: 0; }
+    .sb-segment .label { color: var(--dim); }
+    .sb-segment .value { color: var(--text); }
+    .sb-segment .ok    { color: var(--green); }
+    .sb-segment .warn  { color: var(--yellow); }
+    .sb-segment .err   { color: var(--red); }
+    .sb-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
       background: var(--green);
-      width: 8%; /* обновляй js-ом */
-      transition: width 0.3s;
+      animation: pulse 2s ease-in-out infinite;
     }
-    .topbar-link {
-      color: var(--dim);
-      text-decoration: none;
-      font-size: 12px;
-      font-family: var(--mono);
-    }
-    .topbar-link:hover { color: var(--text); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .sb-right { margin-left: auto; display: flex; gap: 0; }
+    .sb-right .sb-segment { border-right: none; border-left: 1px solid var(--border); }
 
-    /* ── LAYOUT ───────────────────────────── */
-    .layout {
+    /* ══ MAIN LAYOUT ══════════════════════════════════════════ */
+    .workspace {
       display: flex;
       flex: 1;
       overflow: hidden;
     }
 
-    /* ── SIDEBAR ──────────────────────────── */
-    .sidebar {
-      width: var(--sidebar);
+    /* ══ FILE EXPLORER ════════════════════════════════════════ */
+    .explorer {
+      width: 240px;
       background: var(--bg-code);
       border-right: 1px solid var(--border);
-      overflow-y: auto;
-      flex-shrink: 0;
       display: flex;
       flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
     }
-    .sidebar-section { padding: 16px 0; border-bottom: 1px solid var(--border); }
-    .sidebar-label {
+    .explorer-title {
+      padding: 10px 12px 8px;
       font-family: var(--mono);
       font-size: 10px;
-      color: var(--dim);
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      padding: 0 16px 8px;
+      color: var(--dim);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
-    .nav-item {
+    .explorer-tree {
+      overflow-y: auto;
+      flex: 1;
+      padding: 8px 0;
+    }
+    .tree-folder {
+      user-select: none;
+    }
+    .tree-folder-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 16px;
+      gap: 4px;
+      padding: 4px 12px;
       cursor: pointer;
-      font-size: 13px;
+      font-family: var(--mono);
+      font-size: 12px;
       color: var(--dim);
-      text-decoration: none;
-      transition: background 0.1s, color 0.1s;
-      border-left: 2px solid transparent;
+      transition: background 0.1s;
     }
-    .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
-    .nav-item.active {
-      background: rgba(63,185,80,0.08);
+    .tree-folder-header:hover { background: rgba(255,255,255,0.04); }
+    .tree-folder-header .arrow { font-size: 8px; transition: transform 0.15s; width: 10px; }
+    .tree-folder.open > .tree-folder-header .arrow { transform: rotate(90deg); }
+    .tree-folder-name { font-size: 12px; }
+    .tree-folder-badge {
+      margin-left: auto;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      border: 1px solid;
+    }
+    .badge-free   { color: var(--green); border-color: rgba(63,185,80,0.4); }
+    .badge-paid   { color: var(--dim);   border-color: var(--border); }
+    .tree-children { display: none; }
+    .tree-folder.open > .tree-children { display: block; }
+
+    .tree-file {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 12px 3px 28px;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+      transition: background 0.1s;
+      border-left: 2px solid transparent;
+      margin-left: 0;
+    }
+    .tree-file:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+    .tree-file.active {
+      background: rgba(63,185,80,0.07);
       color: var(--text);
       border-left-color: var(--green);
     }
-    .nav-item.locked { opacity: 0.4; cursor: not-allowed; }
-    .nav-num {
+    .tree-file.locked { opacity: 0.35; cursor: not-allowed; }
+    .file-icon { font-size: 11px; width: 14px; text-align: center; flex-shrink: 0; }
+    .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-ext-mp4    { color: var(--blue); }
+    .file-ext-py     { color: var(--yellow); }
+    .file-ext-json   { color: var(--green); }
+    .file-ext-md     { color: var(--purple); }
+
+    .explorer-footer {
+      border-top: 1px solid var(--border);
+      padding: 10px 12px;
+      flex-shrink: 0;
+    }
+    .repo-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-family: var(--mono);
       font-size: 11px;
       color: var(--dim);
-      min-width: 24px;
+      text-decoration: none;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: all 0.15s;
     }
-    .nav-status {
-      margin-left: auto;
-      font-size: 10px;
-      font-family: var(--mono);
-    }
-    .status-done   { color: var(--green); }
-    .status-active { color: var(--yellow); }
-    .status-lock   { color: var(--dim); }
+    .repo-link:hover { color: var(--text); border-color: var(--dim); }
 
-    .sidebar-footer {
-      margin-top: auto;
-      padding: 16px;
-      border-top: 1px solid var(--border);
+    /* ══ CONTENT AREA ═════════════════════════════════════════ */
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
-    .github-btn {
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      align-items: center;
+      background: var(--bg-code);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    .tab {
       display: flex;
       align-items: center;
       gap: 8px;
+      padding: 0 16px;
+      height: 36px;
       font-family: var(--mono);
       font-size: 12px;
       color: var(--dim);
-      text-decoration: none;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      transition: all 0.15s;
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      transition: background 0.1s;
+      flex-shrink: 0;
     }
-    .github-btn:hover { border-color: var(--text-dim); color: var(--text); }
+    .tab:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+    .tab.active { background: var(--bg); color: var(--text); border-bottom: 1px solid var(--bg); margin-bottom: -1px; }
+    .tab-close { opacity: 0; font-size: 10px; margin-left: 2px; }
+    .tab:hover .tab-close, .tab.active .tab-close { opacity: 0.5; }
+    .tab-close:hover { opacity: 1 !important; }
 
-    /* ── CONTENT ──────────────────────────── */
-    .content {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
+    /* Main scroll area */
+    .main-scroll { flex: 1; overflow-y: auto; }
 
-    /* Lesson header */
-    .lesson-header {
-      padding: 24px 36px 20px;
+    /* Video section */
+    .video-section {
+      padding: 20px 28px;
       border-bottom: 1px solid var(--border);
+      background: var(--bg-code);
+    }
+    .lesson-meta-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .lesson-meta {
+      gap: 10px;
+      margin-bottom: 12px;
       font-family: var(--mono);
       font-size: 11px;
       color: var(--dim);
-      margin-bottom: 6px;
     }
-    .lesson-title {
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1.3;
+    .lesson-meta-row .separator { color: var(--border); }
+    .lesson-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
     }
-    .badge {
+    .lesson-h1 { font-size: 18px; font-weight: 700; line-height: 1.3; }
+    .status-pill {
       font-family: var(--mono);
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 4px;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 3px;
       border: 1px solid;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .badge-free    { color: var(--green);  border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.08); }
-    .badge-locked  { color: var(--dim);    border-color: var(--border); }
-    .badge-done    { color: var(--green);  border-color: rgba(63,185,80,0.4); }
+    .pill-free { color: var(--green); border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.07); }
+    .pill-lock { color: var(--dim); border-color: var(--border); }
 
-    /* Video player */
-    .video-wrap {
-      background: var(--bg-code);
-      border-bottom: 1px solid var(--border);
-      padding: 24px 36px;
-    }
     .video-player {
       position: relative;
       aspect-ratio: 16/9;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 6px;
       overflow: hidden;
-      max-width: 800px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      max-width: 760px;
     }
-    .video-placeholder {
-      text-align: center;
+    .video-player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+    .video-placeholder-inner {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px;
     }
-    .play-btn {
-      width: 64px; height: 64px;
-      background: var(--green);
-      border-radius: 50%;
+    .play-circle {
+      width: 56px; height: 56px;
+      background: var(--green); border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px;
-      cursor: pointer;
-      transition: opacity 0.15s;
+      cursor: pointer; transition: opacity 0.15s;
     }
-    .play-btn:hover { opacity: 0.85; }
-    .play-btn span { color: #0b0f14; font-size: 24px; margin-left: 4px; }
-    .video-timecodes {
+    .play-circle:hover { opacity: 0.85; }
+    .play-circle span { color: #0b0f14; font-size: 20px; margin-left: 4px; }
+
+    .timecodes {
       display: flex;
-      gap: 8px;
       flex-wrap: wrap;
-      margin-top: 16px;
-      max-width: 800px;
+      gap: 6px;
+      margin-top: 14px;
+      max-width: 760px;
     }
-    .timecode {
+    .tc-chip {
       font-family: var(--mono);
       font-size: 11px;
-      padding: 4px 10px;
+      padding: 3px 10px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 4px;
@@ -245,461 +296,640 @@
       transition: all 0.15s;
       text-decoration: none;
     }
-    .timecode:hover { border-color: var(--blue); color: var(--blue); }
-    .timecode .tc { color: var(--blue); margin-right: 4px; }
+    .tc-chip:hover { border-color: var(--blue); color: var(--blue); }
+    .tc-chip .t { color: var(--blue); margin-right: 4px; }
 
-    /* Lesson body */
-    .lesson-body {
-      padding: 32px 36px;
-      max-width: 860px;
-    }
-    .lesson-body h3 {
-      font-size: 15px;
-      font-weight: 600;
-      margin: 32px 0 12px;
-      color: var(--text);
-    }
-    .lesson-body h3:first-child { margin-top: 0; }
-    .lesson-body p {
-      color: var(--dim);
-      font-size: 15px;
-      margin-bottom: 16px;
-    }
-    .lesson-body strong { color: var(--text); }
+    /* Lab section */
+    .lab-section { padding: 24px 28px; max-width: 860px; }
 
-    /* Code block */
-    .code-block {
-      position: relative;
-      background: var(--bg-code);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin: 16px 0 24px;
-      overflow: hidden;
-    }
-    .code-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-card);
-    }
-    .code-filename { font-family: var(--mono); font-size: 12px; color: var(--dim); }
-    .copy-btn {
+    .lab-heading {
       font-family: var(--mono);
       font-size: 11px;
       color: var(--dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lab-heading::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .lab-heading:first-child { margin-top: 0; }
+
+    .goal-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .goal-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 8px 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    .goal-chip .key { color: var(--dim); }
+    .goal-chip .val { color: var(--text); }
+
+    .cmd-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 13px;
+      margin: 10px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .cmd-block .prompt { color: var(--green); }
+    .cmd-block .cmd    { color: var(--text); flex: 1; }
+    .cmd-copy {
       background: none;
       border: 1px solid var(--border);
       border-radius: 4px;
       padding: 3px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
       cursor: pointer;
       transition: all 0.15s;
     }
-    .copy-btn:hover { border-color: var(--text-dim); color: var(--text); }
-    .copy-btn.copied { color: var(--green); border-color: var(--green); }
-    .code-block pre {
-      padding: 20px;
+    .cmd-copy:hover { color: var(--text); border-color: var(--dim); }
+    .cmd-copy.done { color: var(--green); border-color: var(--green); }
+
+    /* Interactive Diff */
+    .diff-wrap { margin: 12px 0 24px; }
+    .diff-tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 0;
+    }
+    .diff-tab {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 5px 5px 0 0;
+      cursor: pointer;
+      color: var(--dim);
+      transition: all 0.1s;
+    }
+    .diff-tab.bad.active  { color: var(--red);   background: rgba(248,81,73,0.08); border-color: rgba(248,81,73,0.3); }
+    .diff-tab.good.active { color: var(--green); background: rgba(63,185,80,0.08); border-color: rgba(63,185,80,0.3); }
+    .diff-pane {
+      display: none;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 0 6px 6px 6px;
+      overflow: hidden;
+    }
+    .diff-pane.visible { display: block; }
+    .diff-pane-header {
+      padding: 8px 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .diff-pane.bad  .diff-pane-header { color: var(--red);   background: rgba(248,81,73,0.06); }
+    .diff-pane.good .diff-pane-header { color: var(--green); background: rgba(63,185,80,0.06); }
+    .diff-pane pre {
+      padding: 16px;
       font-family: var(--mono);
       font-size: 13px;
       line-height: 1.8;
-      overflow-x: auto;
       color: var(--text);
+      overflow-x: auto;
     }
-    .code-block .k  { color: var(--purple); } /* keyword */
-    .code-block .s  { color: var(--yellow); } /* string */
-    .code-block .c  { color: var(--dim); font-style: italic; } /* comment */
-    .code-block .n  { color: var(--blue); }   /* function name */
-    .code-block .bad { background: rgba(248,81,73,0.1); display: block; margin: 0 -20px; padding: 0 20px; border-left: 3px solid var(--red); }
-    .code-block .good{ background: rgba(63,185,80,0.08); display: block; margin: 0 -20px; padding: 0 20px; border-left: 3px solid var(--green); }
+    .diff-pane .c  { color: var(--dim); font-style: italic; }
+    .diff-pane .k  { color: var(--purple); }
+    .diff-pane .s  { color: var(--yellow); }
+    .diff-pane .fn { color: var(--blue); }
+    .diff-pane .hi-bad  { background: rgba(248,81,73,0.12); display:block; margin:0 -16px; padding:0 16px; }
+    .diff-pane .hi-good { background: rgba(63,185,80,0.10); display:block; margin:0 -16px; padding:0 16px; }
 
-    /* Diff block */
-    .diff-concept {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 16px 0 24px;
-    }
-    .diff-side {
+    /* Code block */
+    .code-wrap {
       background: var(--bg-code);
       border: 1px solid var(--border);
       border-radius: 6px;
       overflow: hidden;
+      margin: 12px 0 20px;
     }
-    .diff-side-header {
+    .code-wrap-header {
+      display: flex; align-items: center; justify-content: space-between;
       padding: 8px 14px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
       font-family: var(--mono);
       font-size: 11px;
-      border-bottom: 1px solid var(--border);
     }
-    .diff-side.bad  .diff-side-header { color: var(--red);   background: rgba(248,81,73,0.06); }
-    .diff-side.good .diff-side-header { color: var(--green); background: rgba(63,185,80,0.06); }
-    .diff-side pre { padding: 14px; font-family: var(--mono); font-size: 12px; line-height: 1.8; color: var(--dim); }
-
-    /* Asset download */
-    .asset-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 14px 20px;
-      margin: 8px 0;
+    .code-wrap-filename { color: var(--dim); }
+    .copy-code-btn {
+      background: none; border: 1px solid var(--border);
+      border-radius: 3px; padding: 2px 9px;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--dim); cursor: pointer; transition: all 0.15s;
     }
-    .asset-name { font-family: var(--mono); font-size: 13px; color: var(--text); }
-    .asset-desc { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 2px; }
-    .asset-btn {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--blue);
-      text-decoration: none;
-      border: 1px solid rgba(88,166,255,0.3);
-      padding: 5px 14px;
-      border-radius: 4px;
-      transition: all 0.15s;
-      flex-shrink: 0;
+    .copy-code-btn:hover { color: var(--text); border-color: var(--dim); }
+    .copy-code-btn.done { color: var(--green); border-color: var(--green); }
+    .code-wrap pre {
+      padding: 16px; font-family: var(--mono); font-size: 13px;
+      line-height: 1.8; overflow-x: auto; color: var(--text);
     }
-    .asset-btn:hover { background: rgba(88,166,255,0.08); }
+    .code-wrap .c  { color: var(--dim); font-style: italic; }
+    .code-wrap .k  { color: var(--purple); }
+    .code-wrap .s  { color: var(--yellow); }
+    .code-wrap .fn { color: var(--blue); }
 
     /* Callout */
     .callout {
       border-left: 3px solid var(--yellow);
       background: rgba(210,153,34,0.06);
-      padding: 14px 18px;
-      border-radius: 0 6px 6px 0;
-      margin: 16px 0;
-      font-size: 14px;
-    }
-    .callout.danger { border-left-color: var(--red); background: rgba(248,81,73,0.06); }
-    .callout.success { border-left-color: var(--green); background: rgba(63,185,80,0.06); }
-
-    /* Lesson nav */
-    .lesson-nav {
-      display: flex;
-      justify-content: space-between;
-      padding: 24px 36px;
-      border-top: 1px solid var(--border);
-      margin-top: auto;
-    }
-    .lesson-nav a {
+      border-radius: 0 5px 5px 0;
+      padding: 12px 16px;
+      margin: 12px 0 20px;
       font-family: var(--mono);
       font-size: 13px;
+      line-height: 1.7;
       color: var(--dim);
-      text-decoration: none;
-      padding: 10px 16px;
-      border: 1px solid var(--border);
-      border-radius: 5px;
+    }
+    .callout strong { color: var(--text); }
+    .callout.danger  { border-left-color: var(--red);   background: rgba(248,81,73,0.06); }
+    .callout.success { border-left-color: var(--green); background: rgba(63,185,80,0.06); }
+
+    /* Assets */
+    .asset-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 5px; padding: 10px 16px; margin: 6px 0;
+      gap: 12px;
+    }
+    .asset-left { display: flex; align-items: center; gap: 10px; }
+    .asset-icon { font-size: 13px; }
+    .asset-name { font-family: var(--mono); font-size: 12px; color: var(--text); }
+    .asset-desc { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 1px; }
+    .asset-dl {
+      font-family: var(--mono); font-size: 11px; color: var(--blue);
+      border: 1px solid rgba(88,166,255,0.3); border-radius: 4px;
+      padding: 4px 12px; text-decoration: none; white-space: nowrap;
       transition: all 0.15s;
     }
-    .lesson-nav a:hover { border-color: var(--text-dim); color: var(--text); }
-    .lesson-nav a.next {
-      background: var(--green);
-      border-color: var(--green);
-      color: #0b0f14;
-      font-weight: 700;
-    }
-    .lesson-nav a.next:hover { opacity: 0.85; }
+    .asset-dl:hover { background: rgba(88,166,255,0.08); }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .lesson-header, .video-wrap, .lesson-body, .lesson-nav { padding-left: 20px; padding-right: 20px; }
-      .diff-concept { grid-template-columns: 1fr; }
+    /* Lesson nav */
+    .lesson-nav-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 28px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-code);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: var(--mono); font-size: 12px;
+      padding: 8px 16px; border-radius: 5px;
+      border: 1px solid var(--border); color: var(--dim);
+      text-decoration: none; cursor: pointer; background: none;
+      transition: all 0.15s;
+    }
+    .nav-btn:hover { border-color: var(--dim); color: var(--text); }
+    .nav-btn.next {
+      background: var(--green); border-color: var(--green);
+      color: #0b0f14; font-weight: 700;
+    }
+    .nav-btn.next:hover { opacity: 0.85; }
+
+    /* Progress bar in status bar */
+    .sb-progress {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sb-prog-track {
+      width: 80px; height: 3px; background: var(--border);
+      border-radius: 2px; overflow: hidden;
+    }
+    .sb-prog-fill { height: 100%; background: var(--green); width: 8%; }
+
+    @media (max-width: 860px) {
+      .explorer { display: none; }
+      .lab-section, .video-section, .lesson-nav-bar { padding-left: 16px; padding-right: 16px; }
     }
   </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<header class="topbar">
-  <div class="topbar-brand">
-    <span>BEYOND</span> THE SIGNAL <span style="color:var(--dim);font-weight:400;">v1.0</span>
+<!-- ══ STATUS BAR ══════════════════════════════════════════════ -->
+<div class="statusbar">
+  <div class="sb-segment">
+    <span class="label">USER:</span>
+    <span class="value" id="sb-user">engineer_01</span>
   </div>
-  <div class="topbar-right">
-    <span>Прогресс:</span>
-    <div class="progress-bar"><div class="progress-fill"></div></div>
-    <span style="color:var(--green);">1/13</span>
-    <a href="index.html" class="topbar-link">← На лендинг</a>
+  <div class="sb-segment">
+    <span class="label">MODULE:</span>
+    <span class="value">1.1 · The Big Lie</span>
   </div>
-</header>
-
-<div class="layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-
-    <div class="sidebar-section">
-      <p class="sidebar-label">Модуль 0</p>
-      <a class="nav-item" href="#">
-        <span class="nav-num">00</span>
-        <span>Добро пожаловать в реальность</span>
-        <span class="nav-status status-done">✓</span>
-      </a>
+  <div class="sb-segment sb-progress">
+    <span class="label">PROGRESS:</span>
+    <div class="sb-prog-track"><div class="sb-prog-fill"></div></div>
+    <span class="ok">8%</span>
+  </div>
+  <div class="sb-segment">
+    <div class="sb-dot"></div>
+    <span class="label">GHOST_LOG:</span>
+    <span class="ok" id="sb-ghost">ACTIVE · <span id="ghost-count">—</span> signals</span>
+  </div>
+  <div class="sb-segment">
+    <span class="label">SYSTEM:</span>
+    <span class="ok">NOMINAL</span>
+  </div>
+  <div class="sb-right">
+    <div class="sb-segment">
+      <a href="index.html" style="color:var(--dim);text-decoration:none;font-size:11px;font-family:var(--mono);">← landing</a>
     </div>
-
-    <div class="sidebar-section">
-      <p class="sidebar-label">Модуль 1 — Эпистемология</p>
-      <a class="nav-item active" href="#">
-        <span class="nav-num">01</span>
-        <span>The Big Lie</span>
-        <span class="nav-status status-active">▶</span>
-      </a>
-      <a class="nav-item" href="#">
-        <span class="nav-num">02</span>
-        <span>Data Leakage</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-      <a class="nav-item locked">
-        <span class="nav-num">03</span>
-        <span>Survivorship Bias</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-      <a class="nav-item locked">
-        <span class="nav-num">04</span>
-        <span>Silent Failures</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-    </div>
-
-    <div class="sidebar-section">
-      <p class="sidebar-label">Модуль 2 — Signal Intelligence</p>
-      <a class="nav-item locked">
-        <span class="nav-num">05</span>
-        <span>От промпта к инженерии</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-      <a class="nav-item locked">
-        <span class="nav-num">06</span>
-        <span>Ensemble: три модели</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-      <a class="nav-item locked">
-        <span class="nav-num">07</span>
-        <span>The Gate: Confluence</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-      <a class="nav-item locked">
-        <span class="nav-num">08</span>
-        <span>SMC Quality Bridge</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-    </div>
-
-    <div class="sidebar-section">
-      <p class="sidebar-label">Модуль 3 — Execution & SRE</p>
-      <a class="nav-item locked">
-        <span class="nav-num">09</span>
-        <span>Correlation Trap</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-      <a class="nav-item locked">
-        <span class="nav-num">10</span>
-        <span>Shadow Reconciler</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-      <a class="nav-item locked">
-        <span class="nav-num">11</span>
-        <span>Watchdog & Supervision</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-      <a class="nav-item locked">
-        <span class="nav-num">12</span>
-        <span>Precision Management</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-    </div>
-
-    <div class="sidebar-section">
-      <p class="sidebar-label">Модуль 4 — Measure & Learn</p>
-      <a class="nav-item locked">
-        <span class="nav-num">13</span>
-        <span>Kelly Criterion</span>
-        <span class="nav-status status-lock">🔒</span>
-      </a>
-    </div>
-
-    <div class="sidebar-footer">
-      <a href="https://github.com/sab0tag/beyond-the-signal" class="github-btn" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="var(--dim)"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        Lab Repo
-      </a>
-    </div>
-
-  </aside>
-
-  <!-- CONTENT -->
-  <main class="content">
-
-    <!-- LESSON HEADER -->
-    <div class="lesson-header">
-      <div>
-        <p class="lesson-meta">Модуль 1 · Урок 1.1 · 45 мин</p>
-        <h1 class="lesson-title">The Big Lie: Почему бэктест всегда красивее реальности</h1>
-      </div>
-      <span class="badge badge-free">// free</span>
-    </div>
-
-    <!-- VIDEO -->
-    <div class="video-wrap">
-      <div class="video-player">
-        <!-- ЗАМЕНИ на iframe когда будет видео: -->
-        <!-- <iframe width="100%" height="100%" style="position:absolute;inset:0;border:none;"
-          src="https://www.youtube.com/embed/ТВОЙ_ID?rel=0&modestbranding=1"
-          allowfullscreen></iframe> -->
-        <div class="video-placeholder">
-          <div class="play-btn"><span>▶</span></div>
-          <p style="font-family:var(--mono);font-size:12px;color:var(--dim);">Видео скоро · screencast записывается</p>
-        </div>
-      </div>
-
-      <!-- Timecodes -->
-      <div class="video-timecodes">
-        <a class="timecode" href="#"><span class="tc">0:00</span> Intro: лог в 3 ночи</a>
-        <a class="timecode" href="#"><span class="tc">3:20</span> Бэктест +287% vs Live −28%</a>
-        <a class="timecode" href="#"><span class="tc">8:45</span> Transaction costs: реальные цифры</a>
-        <a class="timecode" href="#"><span class="tc">14:10</span> Bar-close bias: видеть будущее</a>
-        <a class="timecode" href="#"><span class="tc">22:30</span> Slippage в production</a>
-        <a class="timecode" href="#"><span class="tc">31:00</span> v13_backtest.py vs historical_replay</a>
-        <a class="timecode" href="#"><span class="tc">40:15</span> Walk-Forward: честный тест</a>
-      </div>
-    </div>
-
-    <!-- LESSON BODY -->
-    <div class="lesson-body">
-
-      <h3>Проблема: один и тот же код, разные вселенные</h3>
-      <p>
-        Тот же код. Те же данные. Та же логика.<br>
-        Бэктест: <strong style="color:var(--green)">+287%</strong>. Live: <strong style="color:var(--red)">−28%</strong>.<br>
-        Разница — не рынок. Разница — пять механизмов которые бэктест игнорирует.
-      </p>
-
-      <div class="callout danger">
-        <strong>Главное правило:</strong> Если система не воспроизводит transaction costs, slippage и bar-close latency — она не тестирует реальность. Она тестирует оптимизм.
-      </div>
-
-      <h3>Механизм #1 — Bar-Close Bias</h3>
-      <p>Бот читал цену <em>незакрытой</em> свечи. В тесте это работает. В реальности — нет.</p>
-
-      <div class="diff-concept">
-        <div class="diff-side bad">
-          <div class="diff-side-header">❌ Как было (утечка)</div>
-          <pre>signal = df.iloc[i]["close"]
-# Читаем цену i-й свечи
-# Которая ещё не закрылась
-# Бот "видит будущее"</pre>
-        </div>
-        <div class="diff-side good">
-          <div class="diff-side-header">✅ Как надо (честно)</div>
-          <pre>signal = df.iloc[i-1]["close"]
-# Читаем цену ЗАКРЫТОЙ свечи
-# Вход на open следующей
-# Никакого lookahead</pre>
-        </div>
-      </div>
-
-      <h3>Механизм #2 — Transaction Costs</h3>
-      <p>$500 депозит. 159 сделок в день (до оптимизации). Считаем:</p>
-
-      <div class="code-block">
-        <div class="code-header">
-          <span class="code-filename">true_cost_analysis.py</span>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-        <pre><span class="k">def</span> <span class="n">true_cost_analysis</span>(trades_per_day, avg_size_usdt, fee_rate=0.0004):
-    <span class="c"># Binance Futures maker/taker: 0.02%/0.04% → avg ~0.04%</span>
-    daily_volume  = trades_per_day * avg_size_usdt * 2  <span class="c"># вход + выход</span>
-    daily_fees    = daily_volume * fee_rate
-    monthly_fees  = daily_fees * 30
-    annual_fees   = monthly_fees * 12
-
-    <span class="k">return</span> {
-        <span class="s">"daily_fees"</span>:   daily_fees,
-        <span class="s">"monthly_fees"</span>: monthly_fees,
-        <span class="s">"annual_pct"</span>:  annual_fees / 500 * 100,  <span class="c"># % от депозита</span>
-    }
-
-<span class="c"># До оптимизации: 159 сделок/день по $22</span>
-result = true_cost_analysis(159, 22)
-<span class="c"># monthly_fees: $124 → 24.9% годовых только на комиссиях</span></pre>
-      </div>
-
-      <h3>Наши инструменты: честный vs быстрый</h3>
-      <p>В системе два бэктест-инструмента с принципиально разной точностью:</p>
-
-      <div class="code-block">
-        <div class="code-header">
-          <span class="code-filename">сравнение инструментов</span>
-        </div>
-        <pre><span class="c"># ── v13_backtest.py ────────────────────────────────────</span>
-<span class="c"># Скорость: ~3 секунды</span>
-<span class="c"># Метод:    proxy-scores (аппроксимация)</span>
-<span class="c"># Честность: говорит "LIKELY" — признаёт неточность</span>
-<span class="c"># Когда:    быстрая проверка гипотезы</span>
-
-<span class="c"># ── historical_replay_validator.py ─────────────────────</span>
-<span class="c"># Скорость: ~3 минуты (реальные OHLCV с Binance)</span>
-<span class="c"># Метод:    tick-level replay, реальные цены</span>
-<span class="c"># Честность: включает costs, slippage, bar-close</span>
-<span class="c"># Когда:    перед деплоем изменений</span></pre>
-      </div>
-
-      <div class="callout success">
-        <strong>Правило системы:</strong> v13_backtest для ежедневной проверки. historical_replay перед каждым деплоем изменений в confluence логику.
-      </div>
-
-      <h3>Материалы урока</h3>
-
-      <div class="asset-box">
-        <div>
-          <p class="asset-name">scripts/v13_backtest.py</p>
-          <p class="asset-desc">Быстрый структурный бэктест · proxy scores · ~3s</p>
-        </div>
-        <a href="https://github.com/sab0tag/beyond-the-signal" class="asset-btn" target="_blank">GitHub →</a>
-      </div>
-      <div class="asset-box">
-        <div>
-          <p class="asset-name">scripts/historical_replay_validator.py</p>
-          <p class="asset-desc">Честный OHLCV replay · real Binance data · ~3min</p>
-        </div>
-        <a href="https://github.com/sab0tag/beyond-the-signal" class="asset-btn" target="_blank">GitHub →</a>
-      </div>
-      <div class="asset-box">
-        <div>
-          <p class="asset-name">true_cost_analysis.py</p>
-          <p class="asset-desc">Калькулятор реальных издержек для твоего депозита</p>
-        </div>
-        <a href="#" class="asset-btn">Download</a>
-      </div>
-
-    </div>
-
-    <!-- LESSON NAV -->
-    <div class="lesson-nav">
-      <a href="#">← 00. Intro</a>
-      <a href="#" class="next">02. Data Leakage →</a>
-    </div>
-
-  </main>
+  </div>
 </div>
 
+<div class="workspace">
+
+  <!-- ══ FILE EXPLORER ════════════════════════════════════════ -->
+  <aside class="explorer">
+    <div class="explorer-title">EXPLORER — beyond_the_signal</div>
+    <div class="explorer-tree">
+
+      <!-- Level 0 -->
+      <div class="tree-folder open">
+        <div class="tree-folder-header" onclick="toggleFolder(this)">
+          <span class="arrow">▶</span>
+          <span>📂</span>
+          <span class="tree-folder-name">Level_0_Free</span>
+          <span class="tree-folder-badge badge-free">free</span>
+        </div>
+        <div class="tree-children">
+          <div class="tree-file active" onclick="openLesson(this, '00')">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">00_reality_check.mp4</span>
+          </div>
+          <div class="tree-file" onclick="openLesson(this, '00-notes')">
+            <span class="file-icon file-ext-md">≡</span>
+            <span class="file-name">00_notes.md</span>
+          </div>
+          <div class="tree-file" onclick="openLesson(this, 'claude-md')">
+            <span class="file-icon file-ext-md">≡</span>
+            <span class="file-name">CLAUDE.md</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level 1 -->
+      <div class="tree-folder open">
+        <div class="tree-folder-header" onclick="toggleFolder(this)">
+          <span class="arrow">▶</span>
+          <span>📂</span>
+          <span class="tree-folder-name">Level_1_Survival</span>
+          <span class="tree-folder-badge badge-free">$397</span>
+        </div>
+        <div class="tree-children">
+          <div class="tree-file active" onclick="openLesson(this, '01')">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">01_the_big_lie.mp4</span>
+          </div>
+          <div class="tree-file" onclick="openLesson(this, '01-py')">
+            <span class="file-icon file-ext-py">⬡</span>
+            <span class="file-name">01_split_validator.py</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">02_data_leakage.mp4</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-py">⬡</span>
+            <span class="file-name">02_safe_time_split.py</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">03_survivorship_bias.mp4</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-py">⬡</span>
+            <span class="file-name">ghost_log.py</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-json">{ }</span>
+            <span class="file-name">ghost_trades.json</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">04_silent_failures.mp4</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-py">⬡</span>
+            <span class="file-name">04_endpoint_audit.py</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level 2 -->
+      <div class="tree-folder">
+        <div class="tree-folder-header" onclick="toggleFolder(this)">
+          <span class="arrow">▶</span>
+          <span>📂</span>
+          <span class="tree-folder-name">Level_2_Pro</span>
+          <span class="tree-folder-badge badge-paid">$1297</span>
+        </div>
+        <div class="tree-children">
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">05_llm_engineering.mp4</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">06_ensemble_models.mp4</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-py">⬡</span>
+            <span class="file-name">signal_confluence.py</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">07_the_gate.mp4</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-mp4">▶</span>
+            <span class="file-name">08_sre_watchdog.mp4</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-py">⬡</span>
+            <span class="file-name">reconciliation_core.py</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-py">⬡</span>
+            <span class="file-name">calculate_optimal_risk.py</span>
+          </div>
+          <div class="tree-file locked">
+            <span class="file-icon file-ext-json">{ }</span>
+            <span class="file-name">weekly_audit_report.json</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="explorer-footer">
+      <a href="https://github.com/sab0tag/beyond-the-signal" class="repo-link" target="_blank">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="var(--dim)"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Open Lab Repo
+      </a>
+    </div>
+  </aside>
+
+  <!-- ══ CONTENT AREA ════════════════════════════════════════ -->
+  <div class="content-area">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <div class="tab active">
+        <span class="file-ext-mp4">▶</span>
+        <span>01_the_big_lie.mp4</span>
+        <span class="tab-close">✕</span>
+      </div>
+      <div class="tab">
+        <span class="file-ext-py" style="color:var(--yellow)">⬡</span>
+        <span>01_split_validator.py</span>
+        <span class="tab-close">✕</span>
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="main-scroll">
+
+      <!-- VIDEO -->
+      <div class="video-section">
+        <div class="lesson-meta-row">
+          <span>Module 1</span>
+          <span class="separator">·</span>
+          <span>Lesson 1.1</span>
+          <span class="separator">·</span>
+          <span>45 min</span>
+        </div>
+        <div class="lesson-title-row">
+          <h1 class="lesson-h1">The Big Lie: Почему бэктест всегда красивее реальности</h1>
+          <span class="status-pill pill-free">// free</span>
+        </div>
+
+        <div class="video-player">
+          <!-- РАСКОММЕНТИРУЙ когда будет YouTube ID: -->
+          <!-- <iframe src="https://www.youtube.com/embed/ТВОЙ_ID?rel=0&modestbranding=1" allowfullscreen></iframe> -->
+          <div class="video-placeholder-inner">
+            <div class="play-circle"><span>▶</span></div>
+            <p style="font-family:var(--mono);font-size:11px;color:var(--dim);">screencast · скоро</p>
+          </div>
+        </div>
+
+        <div class="timecodes">
+          <a class="tc-chip"><span class="t">0:00</span>Лог в 3 ночи</a>
+          <a class="tc-chip"><span class="t">3:20</span>+287% vs −28%</a>
+          <a class="tc-chip"><span class="t">8:45</span>Transaction costs</a>
+          <a class="tc-chip"><span class="t">14:10</span>Bar-close bias</a>
+          <a class="tc-chip"><span class="t">22:30</span>Slippage real</a>
+          <a class="tc-chip"><span class="t">31:00</span>v13 vs replay</a>
+          <a class="tc-chip"><span class="t">40:15</span>Walk-Forward</a>
+        </div>
+      </div>
+
+      <!-- LAB -->
+      <div class="lab-section">
+
+        <div class="lab-heading">// цель урока</div>
+        <div class="goal-row">
+          <div class="goal-chip">
+            <span class="key">Main Goal:</span>
+            <span class="val">Устранить lookahead bias и считать реальные costs</span>
+          </div>
+          <div class="goal-chip">
+            <span class="key">After this:</span>
+            <span class="val">Никогда не верить бэктесту без replay</span>
+          </div>
+        </div>
+
+        <div class="lab-heading">// ключевая команда</div>
+        <div class="cmd-block">
+          <span class="prompt">$</span>
+          <span class="cmd">python3 scripts/historical_replay_validator.py --symbol ETHUSDT --days 30</span>
+          <button class="cmd-copy" onclick="copyCmd(this)">Copy</button>
+        </div>
+
+        <div class="lab-heading">// code diff: плохой код vs код выживания</div>
+        <div class="diff-wrap">
+          <div class="diff-tabs">
+            <div class="diff-tab bad active" onclick="switchDiff('bad', this)">❌ Bar-close bias (было)</div>
+            <div class="diff-tab good" onclick="switchDiff('good', this)">✅ Честный сигнал (стало)</div>
+          </div>
+          <div class="diff-pane bad visible" id="diff-bad">
+            <div class="diff-pane-header">
+              <span>backtest_naive.py · строки 47–52</span>
+              <span>читает незакрытую свечу → видит будущее</span>
+            </div>
+            <pre><span class="c"># Сигнал на основе текущей (незакрытой) свечи</span>
+<span class="k">for</span> i <span class="k">in</span> range(len(df)):
+<span class="hi-bad">    signal = df.iloc[i][<span class="s">"close"</span>]          <span class="c"># ← ПРОБЛЕМА</span></span>
+<span class="hi-bad">    entry  = df.iloc[i][<span class="s">"close"</span>]          <span class="c"># вход по той же цене</span></span>
+
+    <span class="c"># Бот "знает" цену закрытия до того как она случилась</span>
+    <span class="c"># Accuracy 71% — это не edge, это утечка</span></pre>
+          </div>
+          <div class="diff-pane good" id="diff-good">
+            <div class="diff-pane-header">
+              <span>backtest_honest.py · строки 47–54</span>
+              <span>закрытая свеча → вход на следующей open</span>
+            </div>
+            <pre><span class="c"># Сигнал на основе ЗАКРЫТОЙ свечи i-1</span>
+<span class="k">for</span> i <span class="k">in</span> range(1, len(df)):
+<span class="hi-good">    signal = df.iloc[i-1][<span class="s">"close"</span>]       <span class="c"># ✓ закрытая свеча</span></span>
+<span class="hi-good">    entry  = df.iloc[i][<span class="s">"open"</span>]           <span class="c"># ✓ вход на следующей open</span></span>
+
+    <span class="c"># Теперь бот не видит будущего</span>
+    <span class="c"># Accuracy падает с 71% до 51% — это правда</span></pre>
+          </div>
+        </div>
+
+        <div class="callout danger">
+          <strong>Правило:</strong> Если твой бэктест не воспроизводит transaction costs, slippage и bar latency — он тестирует оптимизм, не реальность.
+        </div>
+
+        <div class="lab-heading">// инструменты</div>
+
+        <div class="code-wrap">
+          <div class="code-wrap-header">
+            <span class="code-wrap-filename">true_cost_analysis.py</span>
+            <button class="copy-code-btn" onclick="copyBlock(this)">Copy</button>
+          </div>
+          <pre><span class="k">def</span> <span class="fn">true_cost_analysis</span>(trades_per_day, avg_size, fee=0.0004):
+    <span class="c"># fee: Binance Futures avg maker+taker ~0.04%</span>
+    monthly = trades_per_day * avg_size * 2 * fee * 30
+    annual_pct = monthly * 12 / 500 * 100
+    <span class="k">return</span> {<span class="s">"monthly_usd"</span>: monthly, <span class="s">"annual_pct_on_500"</span>: annual_pct}
+
+<span class="c"># До оптимизации: 159 сделок/день × $22</span>
+<span class="c"># → $124/мес → 24.9% годовых только на комиссиях</span>
+result = true_cost_analysis(159, 22)
+print(result)</pre>
+        </div>
+
+        <div class="callout success">
+          <strong>В нашей системе:</strong> v13_backtest.py (3 сек, proxy) для ежедневных проверок. historical_replay_validator.py (3 мин, реальные OHLCV) — перед каждым деплоем.
+        </div>
+
+        <div class="lab-heading">// файлы урока</div>
+
+        <div class="asset-item">
+          <div class="asset-left">
+            <span class="asset-icon file-ext-py">⬡</span>
+            <div>
+              <div class="asset-name">scripts/v13_backtest.py</div>
+              <div class="asset-desc">Быстрый структурный бэктест · proxy scores · ~3s</div>
+            </div>
+          </div>
+          <a href="https://github.com/sab0tag/beyond-the-signal" class="asset-dl" target="_blank">GitHub →</a>
+        </div>
+        <div class="asset-item">
+          <div class="asset-left">
+            <span class="asset-icon file-ext-py">⬡</span>
+            <div>
+              <div class="asset-name">scripts/historical_replay_validator.py</div>
+              <div class="asset-desc">Честный OHLCV replay · реальные данные Binance</div>
+            </div>
+          </div>
+          <a href="https://github.com/sab0tag/beyond-the-signal" class="asset-dl" target="_blank">GitHub →</a>
+        </div>
+        <div class="asset-item">
+          <div class="asset-left">
+            <span class="asset-icon file-ext-py">⬡</span>
+            <div>
+              <div class="asset-name">01_split_validator.py</div>
+              <div class="asset-desc">Проверка на bar-close bias и data leakage</div>
+            </div>
+          </div>
+          <a href="#" class="asset-dl">↓ Download</a>
+        </div>
+
+      </div>
+    </div><!-- /main-scroll -->
+
+    <!-- LESSON NAV -->
+    <div class="lesson-nav-bar">
+      <button class="nav-btn">← 00. Reality Check</button>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--dim);">1 / 13</span>
+      <button class="nav-btn next">02. Data Leakage →</button>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /workspace -->
+
 <script>
-  // Copy button
-  function copyCode(btn) {
-    const pre = btn.closest('.code-block').querySelector('pre');
-    navigator.clipboard.writeText(pre.innerText).then(() => {
-      btn.textContent = 'Copied!';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  // Folder toggle
+  function toggleFolder(el) {
+    el.closest('.tree-folder').classList.toggle('open');
+  }
+
+  // File open (placeholder)
+  function openLesson(el, id) {
+    if (el.classList.contains('locked')) return;
+    document.querySelectorAll('.tree-file').forEach(f => f.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Diff toggle
+  function switchDiff(side, btn) {
+    document.querySelectorAll('.diff-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.diff-pane').forEach(p => p.classList.remove('visible'));
+    btn.classList.add('active');
+    document.getElementById('diff-' + side).classList.add('visible');
+  }
+
+  // Copy command
+  function copyCmd(btn) {
+    const cmd = btn.previousElementSibling.textContent;
+    navigator.clipboard.writeText(cmd).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('done');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 2000);
     });
   }
 
-  // Keyboard nav: j/k between lessons
+  // Copy code block
+  function copyBlock(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('done');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 2000);
+    });
+  }
+
+  // Keyboard nav
   document.addEventListener('keydown', e => {
-    if (e.key === 'j') document.querySelector('.lesson-nav .next')?.click();
-    if (e.key === 'k') document.querySelector('.lesson-nav a:first-child')?.click();
+    if (e.key === 'j') document.querySelector('.nav-btn.next')?.click();
+    if (e.key === 'k') document.querySelector('.nav-btn:first-child')?.click();
   });
+
+  // Live ghost log count from GitHub raw
+  fetch('https://raw.githubusercontent.com/sab0tag/beyond-the-signal/main/data/ghost_trades.json')
+    .then(r => r.json())
+    .then(d => {
+      const count = Array.isArray(d) ? d.length : Object.keys(d).length;
+      document.getElementById('ghost-count').textContent = count.toLocaleString();
+    })
+    .catch(() => {
+      document.getElementById('ghost-count').textContent = '753';
+    });
 </script>
 
 </body>
