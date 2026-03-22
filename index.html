@@ -479,6 +479,47 @@
   </div>
 </section>
 
+<!-- ═══════════════════════════ PROOF VIDEO ════════════════════ -->
+<section style="padding: 0 0 64px;">
+  <div class="container">
+    <p class="section-label" style="text-align:center;margin-bottom:20px;">// система в действии · live production</p>
+    <div id="proof-video" style="
+      position:relative;
+      background:var(--bg-code);
+      border:1px solid var(--border);
+      border-radius:8px;
+      overflow:hidden;
+      max-width:720px;
+      margin:0 auto;
+      aspect-ratio:16/9;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    ">
+      <!-- ЗАМЕНИ src на YouTube embed когда запишешь screencast -->
+      <!-- <iframe width="100%" height="100%" style="position:absolute;inset:0;border:none;"
+        src="https://www.youtube.com/embed/ТВОЙ_VIDEO_ID?autoplay=0&rel=0&modestbranding=1"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+        allowfullscreen></iframe> -->
+
+      <!-- Placeholder до записи видео -->
+      <div style="text-align:center;padding:40px;">
+        <div style="font-family:var(--mono);font-size:13px;color:var(--text-dim);margin-bottom:16px;">
+          <span style="color:var(--green);">●</span> REC &nbsp;·&nbsp; live production logs
+        </div>
+        <div class="terminal" style="text-align:left;font-size:12px;max-width:480px;margin:0 auto 20px;">
+          <span class="log-line"><span class="ts">[03:26:51]</span> <span class="warn">WARN </span> <span class="msg">Orders: 100. No SL detected.</span></span>
+          <span class="log-line"><span class="ts">[03:26:52]</span> <span class="err">ERROR</span> <span class="msg">Equity drop: −18.4% in 3m</span></span>
+          <span class="log-line"><span class="ts">[03:26:53]</span> <span class="info">INFO </span> <span class="msg">Ghost Log: 608/753 blocked → loss</span></span>
+        </div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--text-dim);">
+          Screencast скоро появится здесь
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <hr class="divider">
 
 <!-- ═══════════════════════════ PAIN ════════════════════════════ -->
@@ -677,14 +718,42 @@
     <div class="levels-grid">
 
       <div class="level-card" id="level0">
-        <p class="level-badge free">// free</p>
+        <p class="level-badge free">// free · без регистрации</p>
         <p class="level-price">$0</p>
         <p class="level-name">Level 0 — Вход</p>
+
+        <!-- Video preview locked -->
+        <div style="
+          position:relative;
+          background:var(--bg-code);
+          border:1px solid var(--border);
+          border-radius:6px;
+          aspect-ratio:16/9;
+          margin-bottom:16px;
+          overflow:hidden;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          cursor:pointer;
+        " onclick="this.innerHTML='<iframe width=\'100%\' height=\'100%\' style=\'position:absolute;inset:0;border:none;\' src=\'https://www.youtube.com/embed/ТВОЙ_VIDEO_ID?autoplay=1&rel=0\' allow=\'autoplay\' allowfullscreen></iframe>'">
+          <div style="text-align:center;">
+            <div style="
+              width:48px;height:48px;
+              background:var(--green);
+              border-radius:50%;
+              display:flex;align-items:center;justify-content:center;
+              margin:0 auto 10px;
+            ">
+              <span style="color:#0b0f14;font-size:18px;margin-left:3px;">▶</span>
+            </div>
+            <p style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">45 мин · нажми для просмотра</p>
+          </div>
+        </div>
+
         <ul class="level-features">
           <li>5 причин почему твой бот сольёт</li>
           <li>Без кода. Без формул.</li>
-          <li>45 минут видео + PDF</li>
-          <li>Без регистрации</li>
+          <li>Только мышление.</li>
         </ul>
         <a href="#" class="level-cta primary">→ Смотреть сейчас</a>
       </div>

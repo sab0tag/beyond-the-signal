@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beyond the Signal — Course Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0b0f14;
+      --bg-card:  #131920;
+      --bg-code:  #0d1117;
+      --border:   #21262d;
+      --text:     #e6edf3;
+      --dim:      #7d8590;
+      --green:    #3fb950;
+      --red:      #f85149;
+      --yellow:   #d29922;
+      --blue:     #58a6ff;
+      --purple:   #bc8cff;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'Inter', system-ui, sans-serif;
+      --sidebar:  260px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* ── TOP BAR ──────────────────────────── */
+    .topbar {
+      height: 48px;
+      background: var(--bg-code);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .topbar-brand {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .topbar-brand span { color: var(--green); }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+    }
+    .progress-bar {
+      width: 120px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      width: 8%; /* обновляй js-ом */
+      transition: width 0.3s;
+    }
+    .topbar-link {
+      color: var(--dim);
+      text-decoration: none;
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+    .topbar-link:hover { color: var(--text); }
+
+    /* ── LAYOUT ───────────────────────────── */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ──────────────────────────── */
+    .sidebar {
+      width: var(--sidebar);
+      background: var(--bg-code);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-section { padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .sidebar-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0 16px 8px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--dim);
+      text-decoration: none;
+      transition: background 0.1s, color 0.1s;
+      border-left: 2px solid transparent;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+    .nav-item.active {
+      background: rgba(63,185,80,0.08);
+      color: var(--text);
+      border-left-color: var(--green);
+    }
+    .nav-item.locked { opacity: 0.4; cursor: not-allowed; }
+    .nav-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      min-width: 24px;
+    }
+    .nav-status {
+      margin-left: auto;
+      font-size: 10px;
+      font-family: var(--mono);
+    }
+    .status-done   { color: var(--green); }
+    .status-active { color: var(--yellow); }
+    .status-lock   { color: var(--dim); }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .github-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+      text-decoration: none;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      transition: all 0.15s;
+    }
+    .github-btn:hover { border-color: var(--text-dim); color: var(--text); }
+
+    /* ── CONTENT ──────────────────────────── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Lesson header */
+    .lesson-header {
+      padding: 24px 36px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .lesson-meta {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      margin-bottom: 6px;
+    }
+    .lesson-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+    .badge-free    { color: var(--green);  border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.08); }
+    .badge-locked  { color: var(--dim);    border-color: var(--border); }
+    .badge-done    { color: var(--green);  border-color: rgba(63,185,80,0.4); }
+
+    /* Video player */
+    .video-wrap {
+      background: var(--bg-code);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 36px;
+    }
+    .video-player {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 800px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .video-placeholder {
+      text-align: center;
+    }
+    .play-btn {
+      width: 64px; height: 64px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .play-btn:hover { opacity: 0.85; }
+    .play-btn span { color: #0b0f14; font-size: 24px; margin-left: 4px; }
+    .video-timecodes {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      max-width: 800px;
+    }
+    .timecode {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--dim);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .timecode:hover { border-color: var(--blue); color: var(--blue); }
+    .timecode .tc { color: var(--blue); margin-right: 4px; }
+
+    /* Lesson body */
+    .lesson-body {
+      padding: 32px 36px;
+      max-width: 860px;
+    }
+    .lesson-body h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 32px 0 12px;
+      color: var(--text);
+    }
+    .lesson-body h3:first-child { margin-top: 0; }
+    .lesson-body p {
+      color: var(--dim);
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+    .lesson-body strong { color: var(--text); }
+
+    /* Code block */
+    .code-block {
+      position: relative;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 16px 0 24px;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .code-filename { font-family: var(--mono); font-size: 12px; color: var(--dim); }
+    .copy-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover { border-color: var(--text-dim); color: var(--text); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+    .code-block pre {
+      padding: 20px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+      color: var(--text);
+    }
+    .code-block .k  { color: var(--purple); } /* keyword */
+    .code-block .s  { color: var(--yellow); } /* string */
+    .code-block .c  { color: var(--dim); font-style: italic; } /* comment */
+    .code-block .n  { color: var(--blue); }   /* function name */
+    .code-block .bad { background: rgba(248,81,73,0.1); display: block; margin: 0 -20px; padding: 0 20px; border-left: 3px solid var(--red); }
+    .code-block .good{ background: rgba(63,185,80,0.08); display: block; margin: 0 -20px; padding: 0 20px; border-left: 3px solid var(--green); }
+
+    /* Diff block */
+    .diff-concept {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0 24px;
+    }
+    .diff-side {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .diff-side-header {
+      padding: 8px 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      border-bottom: 1px solid var(--border);
+    }
+    .diff-side.bad  .diff-side-header { color: var(--red);   background: rgba(248,81,73,0.06); }
+    .diff-side.good .diff-side-header { color: var(--green); background: rgba(63,185,80,0.06); }
+    .diff-side pre { padding: 14px; font-family: var(--mono); font-size: 12px; line-height: 1.8; color: var(--dim); }
+
+    /* Asset download */
+    .asset-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 20px;
+      margin: 8px 0;
+    }
+    .asset-name { font-family: var(--mono); font-size: 13px; color: var(--text); }
+    .asset-desc { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 2px; }
+    .asset-btn {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--blue);
+      text-decoration: none;
+      border: 1px solid rgba(88,166,255,0.3);
+      padding: 5px 14px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .asset-btn:hover { background: rgba(88,166,255,0.08); }
+
+    /* Callout */
+    .callout {
+      border-left: 3px solid var(--yellow);
+      background: rgba(210,153,34,0.06);
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .callout.danger { border-left-color: var(--red); background: rgba(248,81,73,0.06); }
+    .callout.success { border-left-color: var(--green); background: rgba(63,185,80,0.06); }
+
+    /* Lesson nav */
+    .lesson-nav {
+      display: flex;
+      justify-content: space-between;
+      padding: 24px 36px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .lesson-nav a {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--dim);
+      text-decoration: none;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      transition: all 0.15s;
+    }
+    .lesson-nav a:hover { border-color: var(--text-dim); color: var(--text); }
+    .lesson-nav a.next {
+      background: var(--green);
+      border-color: var(--green);
+      color: #0b0f14;
+      font-weight: 700;
+    }
+    .lesson-nav a.next:hover { opacity: 0.85; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .lesson-header, .video-wrap, .lesson-body, .lesson-nav { padding-left: 20px; padding-right: 20px; }
+      .diff-concept { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <span>BEYOND</span> THE SIGNAL <span style="color:var(--dim);font-weight:400;">v1.0</span>
+  </div>
+  <div class="topbar-right">
+    <span>Прогресс:</span>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+    <span style="color:var(--green);">1/13</span>
+    <a href="index.html" class="topbar-link">← На лендинг</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">Модуль 0</p>
+      <a class="nav-item" href="#">
+        <span class="nav-num">00</span>
+        <span>Добро пожаловать в реальность</span>
+        <span class="nav-status status-done">✓</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">Модуль 1 — Эпистемология</p>
+      <a class="nav-item active" href="#">
+        <span class="nav-num">01</span>
+        <span>The Big Lie</span>
+        <span class="nav-status status-active">▶</span>
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-num">02</span>
+        <span>Data Leakage</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+      <a class="nav-item locked">
+        <span class="nav-num">03</span>
+        <span>Survivorship Bias</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+      <a class="nav-item locked">
+        <span class="nav-num">04</span>
+        <span>Silent Failures</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">Модуль 2 — Signal Intelligence</p>
+      <a class="nav-item locked">
+        <span class="nav-num">05</span>
+        <span>От промпта к инженерии</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+      <a class="nav-item locked">
+        <span class="nav-num">06</span>
+        <span>Ensemble: три модели</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+      <a class="nav-item locked">
+        <span class="nav-num">07</span>
+        <span>The Gate: Confluence</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+      <a class="nav-item locked">
+        <span class="nav-num">08</span>
+        <span>SMC Quality Bridge</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">Модуль 3 — Execution & SRE</p>
+      <a class="nav-item locked">
+        <span class="nav-num">09</span>
+        <span>Correlation Trap</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+      <a class="nav-item locked">
+        <span class="nav-num">10</span>
+        <span>Shadow Reconciler</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+      <a class="nav-item locked">
+        <span class="nav-num">11</span>
+        <span>Watchdog & Supervision</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+      <a class="nav-item locked">
+        <span class="nav-num">12</span>
+        <span>Precision Management</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">Модуль 4 — Measure & Learn</p>
+      <a class="nav-item locked">
+        <span class="nav-num">13</span>
+        <span>Kelly Criterion</span>
+        <span class="nav-status status-lock">🔒</span>
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="https://github.com/sab0tag/beyond-the-signal" class="github-btn" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="var(--dim)"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Lab Repo
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- LESSON HEADER -->
+    <div class="lesson-header">
+      <div>
+        <p class="lesson-meta">Модуль 1 · Урок 1.1 · 45 мин</p>
+        <h1 class="lesson-title">The Big Lie: Почему бэктест всегда красивее реальности</h1>
+      </div>
+      <span class="badge badge-free">// free</span>
+    </div>
+
+    <!-- VIDEO -->
+    <div class="video-wrap">
+      <div class="video-player">
+        <!-- ЗАМЕНИ на iframe когда будет видео: -->
+        <!-- <iframe width="100%" height="100%" style="position:absolute;inset:0;border:none;"
+          src="https://www.youtube.com/embed/ТВОЙ_ID?rel=0&modestbranding=1"
+          allowfullscreen></iframe> -->
+        <div class="video-placeholder">
+          <div class="play-btn"><span>▶</span></div>
+          <p style="font-family:var(--mono);font-size:12px;color:var(--dim);">Видео скоро · screencast записывается</p>
+        </div>
+      </div>
+
+      <!-- Timecodes -->
+      <div class="video-timecodes">
+        <a class="timecode" href="#"><span class="tc">0:00</span> Intro: лог в 3 ночи</a>
+        <a class="timecode" href="#"><span class="tc">3:20</span> Бэктест +287% vs Live −28%</a>
+        <a class="timecode" href="#"><span class="tc">8:45</span> Transaction costs: реальные цифры</a>
+        <a class="timecode" href="#"><span class="tc">14:10</span> Bar-close bias: видеть будущее</a>
+        <a class="timecode" href="#"><span class="tc">22:30</span> Slippage в production</a>
+        <a class="timecode" href="#"><span class="tc">31:00</span> v13_backtest.py vs historical_replay</a>
+        <a class="timecode" href="#"><span class="tc">40:15</span> Walk-Forward: честный тест</a>
+      </div>
+    </div>
+
+    <!-- LESSON BODY -->
+    <div class="lesson-body">
+
+      <h3>Проблема: один и тот же код, разные вселенные</h3>
+      <p>
+        Тот же код. Те же данные. Та же логика.<br>
+        Бэктест: <strong style="color:var(--green)">+287%</strong>. Live: <strong style="color:var(--red)">−28%</strong>.<br>
+        Разница — не рынок. Разница — пять механизмов которые бэктест игнорирует.
+      </p>
+
+      <div class="callout danger">
+        <strong>Главное правило:</strong> Если система не воспроизводит transaction costs, slippage и bar-close latency — она не тестирует реальность. Она тестирует оптимизм.
+      </div>
+
+      <h3>Механизм #1 — Bar-Close Bias</h3>
+      <p>Бот читал цену <em>незакрытой</em> свечи. В тесте это работает. В реальности — нет.</p>
+
+      <div class="diff-concept">
+        <div class="diff-side bad">
+          <div class="diff-side-header">❌ Как было (утечка)</div>
+          <pre>signal = df.iloc[i]["close"]
+# Читаем цену i-й свечи
+# Которая ещё не закрылась
+# Бот "видит будущее"</pre>
+        </div>
+        <div class="diff-side good">
+          <div class="diff-side-header">✅ Как надо (честно)</div>
+          <pre>signal = df.iloc[i-1]["close"]
+# Читаем цену ЗАКРЫТОЙ свечи
+# Вход на open следующей
+# Никакого lookahead</pre>
+        </div>
+      </div>
+
+      <h3>Механизм #2 — Transaction Costs</h3>
+      <p>$500 депозит. 159 сделок в день (до оптимизации). Считаем:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">true_cost_analysis.py</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="k">def</span> <span class="n">true_cost_analysis</span>(trades_per_day, avg_size_usdt, fee_rate=0.0004):
+    <span class="c"># Binance Futures maker/taker: 0.02%/0.04% → avg ~0.04%</span>
+    daily_volume  = trades_per_day * avg_size_usdt * 2  <span class="c"># вход + выход</span>
+    daily_fees    = daily_volume * fee_rate
+    monthly_fees  = daily_fees * 30
+    annual_fees   = monthly_fees * 12
+
+    <span class="k">return</span> {
+        <span class="s">"daily_fees"</span>:   daily_fees,
+        <span class="s">"monthly_fees"</span>: monthly_fees,
+        <span class="s">"annual_pct"</span>:  annual_fees / 500 * 100,  <span class="c"># % от депозита</span>
+    }
+
+<span class="c"># До оптимизации: 159 сделок/день по $22</span>
+result = true_cost_analysis(159, 22)
+<span class="c"># monthly_fees: $124 → 24.9% годовых только на комиссиях</span></pre>
+      </div>
+
+      <h3>Наши инструменты: честный vs быстрый</h3>
+      <p>В системе два бэктест-инструмента с принципиально разной точностью:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">сравнение инструментов</span>
+        </div>
+        <pre><span class="c"># ── v13_backtest.py ────────────────────────────────────</span>
+<span class="c"># Скорость: ~3 секунды</span>
+<span class="c"># Метод:    proxy-scores (аппроксимация)</span>
+<span class="c"># Честность: говорит "LIKELY" — признаёт неточность</span>
+<span class="c"># Когда:    быстрая проверка гипотезы</span>
+
+<span class="c"># ── historical_replay_validator.py ─────────────────────</span>
+<span class="c"># Скорость: ~3 минуты (реальные OHLCV с Binance)</span>
+<span class="c"># Метод:    tick-level replay, реальные цены</span>
+<span class="c"># Честность: включает costs, slippage, bar-close</span>
+<span class="c"># Когда:    перед деплоем изменений</span></pre>
+      </div>
+
+      <div class="callout success">
+        <strong>Правило системы:</strong> v13_backtest для ежедневной проверки. historical_replay перед каждым деплоем изменений в confluence логику.
+      </div>
+
+      <h3>Материалы урока</h3>
+
+      <div class="asset-box">
+        <div>
+          <p class="asset-name">scripts/v13_backtest.py</p>
+          <p class="asset-desc">Быстрый структурный бэктест · proxy scores · ~3s</p>
+        </div>
+        <a href="https://github.com/sab0tag/beyond-the-signal" class="asset-btn" target="_blank">GitHub →</a>
+      </div>
+      <div class="asset-box">
+        <div>
+          <p class="asset-name">scripts/historical_replay_validator.py</p>
+          <p class="asset-desc">Честный OHLCV replay · real Binance data · ~3min</p>
+        </div>
+        <a href="https://github.com/sab0tag/beyond-the-signal" class="asset-btn" target="_blank">GitHub →</a>
+      </div>
+      <div class="asset-box">
+        <div>
+          <p class="asset-name">true_cost_analysis.py</p>
+          <p class="asset-desc">Калькулятор реальных издержек для твоего депозита</p>
+        </div>
+        <a href="#" class="asset-btn">Download</a>
+      </div>
+
+    </div>
+
+    <!-- LESSON NAV -->
+    <div class="lesson-nav">
+      <a href="#">← 00. Intro</a>
+      <a href="#" class="next">02. Data Leakage →</a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Copy button
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Keyboard nav: j/k between lessons
+  document.addEventListener('keydown', e => {
+    if (e.key === 'j') document.querySelector('.lesson-nav .next')?.click();
+    if (e.key === 'k') document.querySelector('.lesson-nav a:first-child')?.click();
+  });
+</script>
+
+</body>
+</html>
