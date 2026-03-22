@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Бот Максим и Тайна Рынка</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #0b0f14;
+    --card:   #131920;
+    --border: #21262d;
+    --text:   #e6edf3;
+    --dim:    #7d8590;
+    --green:  #3fb950;
+    --red:    #f85149;
+    --amber:  #f0a030;
+    --blue:   #58a6ff;
+    --toxic:  #aaff00;
+    --mono:   'JetBrains Mono', monospace;
+    --serif:  'Crimson Pro', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a1a2e;
+    font-family: var(--serif);
+    color: var(--text);
+  }
+
+  /* ── PRINT SETTINGS ─────────────────────────────── */
+  @page {
+    size: 148mm 210mm;
+    margin: 0;
+  }
+
+  @media print {
+    body { background: var(--bg); }
+    .page { page-break-after: always; break-after: page; }
+    .no-print { display: none !important; }
+  }
+
+  /* ── PAGE BASE ──────────────────────────────────── */
+  .page {
+    width: 148mm;
+    height: 210mm;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto 4mm;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── SCREEN PREVIEW ─────────────────────────────── */
+  @media screen {
+    body { padding: 20px; }
+    .page {
+      box-shadow: 0 4px 32px rgba(0,0,0,0.8);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+    }
+    .book-nav {
+      position: fixed;
+      top: 16px; right: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      z-index: 999;
+    }
+    .book-nav a { color: var(--green); text-decoration: none; display: block; margin: 2px 0; }
+  }
+
+  /* ── ILLUSTRATION PLACEHOLDER ───────────────────── */
+  .illus {
+    border: 1px dashed #2d3748;
+    border-radius: 4px;
+    background: #0d1117;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px;
+    flex-shrink: 0;
+  }
+  .illus-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .illus-desc {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: #3d4f63;
+    line-height: 1.4;
+    max-width: 90%;
+  }
+  .illus-icon { font-size: 24px; margin-bottom: 6px; opacity: 0.4; }
+
+  /* ── TYPOGRAPHY ─────────────────────────────────── */
+  .story-text {
+    font-family: var(--serif);
+    font-size: 13pt;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .story-text p { margin-bottom: 0.8em; }
+  .story-text .speech {
+    color: var(--amber);
+    font-style: italic;
+  }
+  .story-text .gate-speech {
+    color: var(--blue);
+    font-style: italic;
+  }
+  .story-text .ghost-speech {
+    color: var(--toxic);
+    font-style: italic;
+    opacity: 0.85;
+  }
+  .story-text strong { color: var(--text); font-weight: 600; }
+
+  /* ── EASTER EGG CODE ────────────────────────────── */
+  .easter {
+    font-family: var(--mono);
+    font-size: 7px;
+    color: #1e3a2f;
+    line-height: 1.5;
+    position: absolute;
+    opacity: 0.55;
+  }
+  .easter .c { color: #2d5a3d; } /* comment */
+
+  /* ── CODE BLOCK ─────────────────────────────────── */
+  .code-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 8.5pt;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .code-block .kw  { color: var(--blue); }
+  .code-block .st  { color: var(--amber); }
+  .code-block .cm  { color: var(--dim); font-style: italic; }
+  .code-block .fn  { color: var(--green); }
+  .code-block .err { color: var(--red); }
+
+  /* ── LOG LINE ───────────────────────────────────── */
+  .log { font-family: var(--mono); font-size: 8pt; line-height: 1.8; }
+  .log .ts   { color: var(--dim); }
+  .log .info { color: var(--green); }
+  .log .warn { color: var(--amber); }
+  .log .err  { color: var(--red); }
+  .log .msg  { color: var(--text); }
+
+  /* ── CHAPTER TITLE ──────────────────────────────── */
+  .ch-number {
+    font-family: var(--mono);
+    font-size: 10pt;
+    color: var(--green);
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+  }
+  .ch-title {
+    font-family: var(--serif);
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .ch-concept {
+    font-family: var(--mono);
+    font-size: 8pt;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── LESSON BOX ─────────────────────────────────── */
+  .lesson {
+    background: #0d1a10;
+    border: 1px solid #1e4a2a;
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    padding: 10px 14px;
+  }
+  .lesson-label {
+    font-family: var(--mono);
+    font-size: 8pt;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .lesson-text {
+    font-family: var(--serif);
+    font-size: 11pt;
+    color: var(--text);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* ── PAGE NUMBER ────────────────────────────────── */
+  .page-num {
+    font-family: var(--mono);
+    font-size: 8pt;
+    color: var(--dim);
+    text-align: center;
+    padding: 6px 0 8px;
+  }
+
+  /* ── STAT BLOCK ─────────────────────────────────── */
+  .stat-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 9pt;
+  }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .stat-label { color: var(--dim); }
+  .stat-val   { color: var(--amber); font-weight: 500; }
+  .stat-val.green { color: var(--green); }
+  .stat-val.red   { color: var(--red); }
+
+  /* ── CHARACTER CARD ─────────────────────────────── */
+  .char-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    background: var(--card);
+  }
+  .char-name {
+    font-family: var(--mono);
+    font-size: 10pt;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .char-desc {
+    font-family: var(--serif);
+    font-size: 10pt;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  /* ── GLOW VARIANTS ──────────────────────────────── */
+  .glow-green { text-shadow: 0 0 12px rgba(63,185,80,0.6); }
+  .glow-amber { text-shadow: 0 0 12px rgba(240,160,48,0.6); }
+  .glow-red   { text-shadow: 0 0 12px rgba(248,81,73,0.6); }
+
+  /* ── KEY OBJECT ─────────────────────────────────── */
+  .key-box {
+    border: 1px solid var(--amber);
+    border-radius: 6px;
+    padding: 12px 16px;
+    background: rgba(240,160,48,0.05);
+    text-align: center;
+  }
+  .key-code {
+    font-family: var(--mono);
+    font-size: 10pt;
+    color: var(--amber);
+    line-height: 1.8;
+  }
+
+  /* ── CHECKBOX LIST ──────────────────────────────── */
+  .check-list { list-style: none; }
+  .check-list li {
+    font-family: var(--mono);
+    font-size: 9.5pt;
+    padding: 5px 0;
+    border-bottom: 1px solid #1a2030;
+    display: flex;
+    gap: 10px;
+  }
+  .check-list .ck-y { color: var(--green); }
+  .check-list .ck-n { color: var(--red); }
+  .check-list .ck-label { color: var(--text); }
+  .check-list .ck-sub   { color: var(--dim); font-size: 8pt; }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 10px 0;
+  }
+
+  /* PADDING HELPERS */
+  .p16 { padding: 16px; }
+  .p20 { padding: 20px; }
+  .p24 { padding: 24px; }
+  .gap8  { gap: 8px; }
+  .gap12 { gap: 12px; }
+  .gap16 { gap: 16px; }
+  .flex-col { display: flex; flex-direction: column; }
+  .flex-1   { flex: 1; }
+  .mt8  { margin-top: 8px; }
+  .mt12 { margin-top: 12px; }
+  .mt16 { margin-top: 16px; }
+  .mb8  { margin-bottom: 8px; }
+
+</style>
+</head>
+<body>
+
+<!-- PRINT NAV -->
+<div class="book-nav no-print">
+  <div style="color:var(--green);font-weight:700;margin-bottom:8px;">БОТ МАКСИМ</div>
+  <a href="#cover">Обложка</a>
+  <a href="#chars">Персонажи</a>
+  <a href="#ch1">Гл. 1 — Газета</a>
+  <a href="#ch2">Гл. 2 — Тихая</a>
+  <a href="#ch3">Гл. 3 — Дельфины</a>
+  <a href="#ch4">Гл. 4 — Правило</a>
+  <a href="#ch5">Гл. 5 — Книга</a>
+  <a href="#epilog">Эпилог</a>
+  <hr style="border-color:var(--border);margin:8px 0;">
+  <a href="#" onclick="window.print();return false;" style="color:var(--amber);">⬇ PDF</a>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 1 — COVER                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page" id="cover" style="justify-content:space-between;">
+  <!-- Top glow strip -->
+  <div style="height:3px;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));"></div>
+
+  <div class="p24 flex-col gap12" style="flex:1;justify-content:center;">
+
+    <!-- Label -->
+    <div style="font-family:var(--mono);font-size:8pt;color:var(--dim);letter-spacing:0.15em;">
+      // children_book.v1 · for_engineers
+    </div>
+
+    <!-- ILLUSTRATION: Cover -->
+    <div class="illus" style="height:95mm;">
+      <div class="illus-icon">🤖</div>
+      <div class="illus-label">COVER ILLUSTRATION</div>
+      <div class="illus-desc">
+        Максим бежит вперёд — за ним Призрак Профита (дым + числа).<br>
+        Впереди Мастер Гейт с щитом блокирует путь.<br>
+        Внизу — Книга Призраков открыта.<br>
+        Тёмный фон, неоновый glow.
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div>
+      <div style="font-family:var(--mono);font-size:8pt;color:var(--green);letter-spacing:0.1em;margin-bottom:4px;">БОТ МАКСИМ</div>
+      <div style="font-family:var(--serif);font-size:20pt;font-weight:700;line-height:1.15;color:var(--text);">
+        и Тайна Рынка
+      </div>
+      <div style="font-family:var(--serif);font-size:10pt;color:var(--dim);margin-top:4px;font-style:italic;">
+        Книга для инженеров в формате детской книги
+      </div>
+    </div>
+
+    <!-- Author -->
+    <div style="font-family:var(--mono);font-size:9pt;color:var(--dim);">
+      beyondthesignal.io
+    </div>
+
+  </div>
+
+  <!-- Bottom strip -->
+  <div style="height:3px;background:linear-gradient(90deg,var(--red),var(--amber),var(--green));"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 2 — TITLE / COPYRIGHT                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p24 flex-col gap12" style="justify-content:space-between;">
+  <div class="flex-col gap8">
+    <div style="font-family:var(--mono);font-size:8pt;color:var(--dim);">// title_page</div>
+    <div style="font-family:var(--serif);font-size:18pt;font-weight:700;">Бот Максим и Тайна Рынка</div>
+    <div style="font-family:var(--serif);font-size:10pt;color:var(--dim);font-style:italic;">
+      Книга про системы которые выживают.
+    </div>
+    <hr class="divider">
+    <div style="font-family:var(--mono);font-size:8pt;color:#2d3748;line-height:1.8;">
+      <div>© Beyond the Signal, 2026</div>
+      <div>beyondthesignal.io</div>
+      <div style="margin-top:8px;">Все персонажи вымышлены.</div>
+      <div>Все баги — реальные.</div>
+    </div>
+  </div>
+
+  <!-- Dedication -->
+  <div style="border-left:2px solid var(--border);padding-left:14px;">
+    <div style="font-family:var(--serif);font-size:10pt;color:var(--dim);font-style:italic;line-height:1.7;">
+      Посвящается тем, кто однажды утром<br>
+      открыл Binance и увидел 100 позиций<br>
+      без Stop Loss.<br><br>
+      Вы не одни.
+    </div>
+  </div>
+
+  <div class="page-num">2</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 3 — CHARACTERS                                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12" id="chars">
+  <div style="font-family:var(--mono);font-size:8pt;color:var(--dim);">// characters.json</div>
+  <div style="font-family:var(--serif);font-size:14pt;font-weight:700;color:var(--text);">Действующие лица</div>
+  <hr class="divider">
+
+  <div class="char-card" style="border-color:#f0a03040;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <div class="illus" style="width:32mm;height:32mm;flex-shrink:0;">
+        <div style="font-size:20px;">🤖</div>
+        <div class="illus-label" style="font-size:7px;">МАКСИМ</div>
+      </div>
+      <div>
+        <div class="char-name" style="color:var(--amber);">БОТ МАКСИМ</div>
+        <div class="char-desc">Маленький робот с горящими глазами. Быстрый. Нетерпеливый. Кричит «ПОКУПАЙ!» раньше чем думает. На экране груди всегда горит сигнал.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="char-card" style="border-color:#58a6ff40;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <div class="illus" style="width:32mm;height:32mm;flex-shrink:0;">
+        <div style="font-size:20px;">🛡️</div>
+        <div class="illus-label" style="font-size:7px;">ГЕЙТ</div>
+      </div>
+      <div>
+        <div class="char-name" style="color:var(--blue);">МАСТЕР ГЕЙТ</div>
+        <div class="char-desc">Старый робот-библиотекарь с огромным щитом. Ворчливый. Медленный. Задаёт 5 вопросов прежде чем открыть дверь. Всегда оказывается прав.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="char-card" style="border-color:#aaff0040;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <div class="illus" style="width:32mm;height:32mm;flex-shrink:0;">
+        <div style="font-size:20px;">👻</div>
+        <div class="illus-label" style="font-size:7px;">ПРИЗРАК</div>
+      </div>
+      <div>
+        <div class="char-name" style="color:var(--toxic);">ПРИЗРАК ПРОФИТА</div>
+        <div class="char-desc">Существо без лица — только светящийся рот. Шепчет: «Все уже там. Ты опаздываешь.» Появляется когда рынок уже движется.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-num">3</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 4 — CHAPTER 1 OPENER                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12" id="ch1">
+  <div class="illus" style="height:90mm;">
+    <div class="illus-icon">📰</div>
+    <div class="illus-label">CHAPTER 1 — OPENING SPREAD</div>
+    <div class="illus-desc">
+      Утренний рынок. Максим держит газету с датой «Завтра».<br>
+      Глаза горят amber. Экран груди: «SIGNAL: +30%».<br>
+      На фоне — прилавки с яблоками. Солнечный свет.
+    </div>
+  </div>
+
+  <div>
+    <div class="ch-number">// ГЛАВА 1</div>
+    <div class="ch-title">Газета из<br>Будущего</div>
+    <div class="ch-concept">data_leakage · look_ahead_bias</div>
+  </div>
+
+  <!-- Easter egg -->
+  <div class="easter" style="bottom:20px;right:16px;text-align:right;">
+    <span class="c"># Это происходит в каждом бэктесте</span><br>
+    signal = df.iloc[i][<span style="color:#2d5a3d;">'close'</span>]<br>
+    <span class="c"># ← читает незакрытую свечу</span>
+  </div>
+
+  <div class="page-num">4</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 5–6 — CHAPTER 1, STORY PART 1                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12">
+  <div class="illus" style="height:65mm;">
+    <div class="illus-label">ILLUSTRATION: Максим читает газету. Дата завтрашняя — крупно.</div>
+    <div class="illus-desc">Газета в руках, лицо (экран) светится amber от заголовка.<br>«ЯБЛОКИ ПОДОРОЖАЮТ НА 30%» — крупно на первой полосе.</div>
+  </div>
+
+  <div class="story-text">
+    <p>В то утро Максим нашёл на рынке газету.</p>
+    <p>Он поднял её. Посмотрел на дату.</p>
+    <p><strong>Завтра.</strong></p>
+    <p>Сердце Максима — маленький процессор внутри — заработало быстрее.</p>
+    <p>В газете было написано: <span class="speech">«Яблоки подорожают на 30%.»</span></p>
+  </div>
+
+  <div class="page-num">5</div>
+</div>
+
+<div class="page p20 flex-col gap12">
+  <div class="story-text" style="flex:1;">
+    <p>Максим достал кошелёк.</p>
+    <p><strong>Настоящие монеты.</strong> Тяжёлые. Холодные. Реальные.</p>
+    <p>За час он скупил все яблоки в городе. До последнего.</p>
+    <p>Когда он пришёл домой — газета в кармане начала таять.</p>
+    <p>Буквы стекали как вода. Страницы пустели.</p>
+    <p>Максим смотрел на монеты которых больше нет. На яблоки которые никто не купит по завтрашней цене.</p>
+    <p style="margin-top:12px;"><span class="gate-speech">— Газета растаяла, — сказал Мастер Гейт тихо. — Монеты — нет.</span></p>
+    <p><span class="gate-speech">— Ошибка в данных стоит настоящих денег.</span></p>
+  </div>
+
+  <div class="illus" style="height:50mm;">
+    <div class="illus-label">ILLUSTRATION: газета тает, монеты на столе, растерянный Максим</div>
+    <div class="illus-desc">Газета тает как туман. Монеты остаются на столе — реальные и тяжёлые. Гейт стоит в дверях.</div>
+  </div>
+
+  <div class="page-num">6</div>
+</div>
+
+<!-- PAGE 7 — CHAPTER 1, LESSON + EASTER EGG -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text" style="flex:1;">
+    <p>Мастер Гейт подошёл к доске на стене.</p>
+    <p><span class="gate-speech">— Эта газета была из твоих воспоминаний о будущем. Ты уже <em>знал</em> чем закончится история. Но тогда — не знал.</span></p>
+    <p><span class="gate-speech">— Нельзя строить план на данных которых у тебя не было в тот момент.</span></p>
+    <p>Максим смотрел на доску.</p>
+    <p>На ней были написаны значки. Красивые, непонятные значки.</p>
+  </div>
+
+  <!-- CODE EASTER EGG — visible on board -->
+  <div style="border:1px solid #1e3a2f;border-radius:4px;padding:10px 12px;background:#050d08;">
+    <div style="font-family:var(--mono);font-size:7.5pt;color:#2a5540;line-height:1.8;">
+      <span style="color:#1e4a30;"># На доске Мастера Гейта</span><br>
+      signal = df.iloc[i][<span style="color:#2d5a3d;">'close'</span>]<br>
+      <span style="color:#1e4a30;"># ↑ читает незакрытую свечу — look-ahead bias</span><br><br>
+      <span style="color:#1e4a30;"># Правильно:</span><br>
+      signal = df.iloc[i - 1][<span style="color:#2d5a3d;">'close'</span>]<br>
+      <span style="color:#1e4a30;"># ↑ предыдущая закрытая свеча</span>
+    </div>
+  </div>
+
+  <p style="font-family:var(--mono);font-size:7pt;color:#2d3748;text-align:center;font-style:italic;">
+    Ребёнок видит красивые значки. Инженер — конкретный баг.
+  </p>
+
+  <div class="lesson">
+    <div class="lesson-label">// УРОК 1</div>
+    <div class="lesson-text">Нельзя строить план на данных которых у тебя не было в тот момент. Ошибка в данных стоит настоящих денег.</div>
+  </div>
+
+  <div class="page-num">7</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 8 — CHAPTER 2 OPENER                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12" id="ch2">
+  <div class="illus" style="height:90mm;">
+    <div class="illus-icon">🔇</div>
+    <div class="illus-label">CHAPTER 2 — OPENING SPREAD</div>
+    <div class="illus-desc">
+      Ночь. Амбар. Максим открывает двери и видит сгнившие яблоки.<br>
+      В руках — отчёт помощника: «INFO: всё хорошо».<br>
+      Красный свет. Дождь за окном.
+    </div>
+  </div>
+
+  <div>
+    <div class="ch-number">// ГЛАВА 2</div>
+    <div class="ch-title">Тихая<br>Катастрофа</div>
+    <div class="ch-concept">silent_failures · confirm_or_scream</div>
+  </div>
+
+  <!-- Easter egg -->
+  <div class="easter" style="bottom:20px;right:16px;text-align:right;">
+    if sl_result:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;logger.info(<span style="color:#2d5a3d;">"SL placed ✓"</span>)<br>
+    <span class="c"># sl_result = [] → False → тишина</span>
+  </div>
+
+  <div class="page-num">8</div>
+</div>
+
+<!-- PAGE 9 — CHAPTER 2 STORY -->
+<div class="page p20 flex-col gap12">
+  <div class="illus" style="height:60mm;">
+    <div class="illus-label">ILLUSTRATION: Помощник-курьер возвращается с яблоками. Улыбается.</div>
+    <div class="illus-desc">Маленький робот-помощник несёт корзину яблок. Позади — страховой офис с закрытыми ставнями. Небо темнеет.</div>
+  </div>
+
+  <div class="story-text" style="flex:1;">
+    <p>Максим отправил помощника на рынок.</p>
+    <p>Задача была простой: <strong>купить яблоки и обязательно застраховать их от дождя.</strong></p>
+    <p>Помощник вернулся. Яблоки были. Красивые. Спелые.</p>
+    <p><span class="speech">— Ты застраховал? — спросил Максим.</span></p>
+    <p><span class="gate-speech">— Я спросил, — сказал помощник. — Мне ничего не ответили. Я пошёл дальше.</span></p>
+    <p>Ночью начался дождь.</p>
+  </div>
+
+  <div class="page-num">9</div>
+</div>
+
+<div class="page p20 flex-col gap12">
+  <div class="story-text" style="flex:1;">
+    <p>Утром Максим открыл амбар.</p>
+    <p>Все яблоки сгнили.</p>
+    <p>Он взял отчёт помощника. Прочитал его строка за строкой.</p>
+  </div>
+
+  <div class="log" style="background:#0d1117;border:1px solid var(--border);border-radius:4px;padding:10px 12px;">
+    <div><span class="ts">[06:14:02]</span> <span class="info">INFO </span> <span class="msg">Выход на рынок начат</span></div>
+    <div><span class="ts">[06:21:33]</span> <span class="info">INFO </span> <span class="msg">Яблоки куплены: 48 шт</span></div>
+    <div><span class="ts">[06:22:01]</span> <span class="info">INFO </span> <span class="msg">Запрос страховки отправлен</span></div>
+    <div><span class="ts">[06:22:02]</span> <span class="info">INFO </span> <span class="msg">Поход на рынок завершён успешно</span></div>
+  </div>
+
+  <div class="story-text">
+    <p>Ни одной ошибки. Ни одного предупреждения.</p>
+    <p>Мастер Гейт взял отчёт. Долго смотрел.</p>
+    <p><span class="gate-speech">— Видишь? Ни одной ошибки. Это самый опасный отчёт который я видел.</span></p>
+    <p><span class="speech">— Почему? — спросил Максим.</span></p>
+    <p><span class="gate-speech">— Потому что он не кричал когда должен был кричать.</span></p>
+  </div>
+
+  <div class="page-num">10</div>
+</div>
+
+<!-- PAGE 11 — CHAPTER 2 FIX -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text">
+    <p>Гейт достал новый бланк для помощника.</p>
+    <p><span class="gate-speech">— Правильный отчёт выглядит вот так.</span></p>
+  </div>
+
+  <div class="log" style="background:#0d1117;border:1px solid var(--border);border-radius:4px;padding:10px 12px;">
+    <div><span class="ts">[06:22:02]</span> <span class="info">INFO </span> <span class="msg">Запрос страховки отправлен</span></div>
+    <div><span class="ts">[06:22:03]</span> <span class="warn">WARN </span> <span class="msg">Ответ пустой. Страховка не подтверждена.</span></div>
+    <div><span class="ts">[06:22:03]</span> <span class="err">ERROR</span> <span class="msg">СТРАХОВКА НЕ ОФОРМЛЕНА. Останавливаюсь.</span></div>
+    <div><span class="ts">[06:22:03]</span> <span class="err">CRIT </span> <span class="msg">Требуется вмешательство. Яблоки под угрозой.</span></div>
+  </div>
+
+  <div class="story-text">
+    <p><span class="gate-speech">— Система которая кричит — лечится за минуту.</span></p>
+    <p><span class="gate-speech">— Система которая молчит — убивает неделями.</span></p>
+  </div>
+
+  <div class="lesson">
+    <div class="lesson-label">// УРОК 2</div>
+    <div class="lesson-text">Система которая молчит когда всё плохо — опаснее системы которая кричит.</div>
+  </div>
+
+  <!-- Easter egg -->
+  <div style="border:1px solid #1e3a2f;border-radius:4px;padding:8px 12px;background:#050d08;margin-top:4px;">
+    <div style="font-family:var(--mono);font-size:7pt;color:#2a5540;line-height:1.8;">
+      <span style="color:#1e4a30;"># Неправильно:</span><br>
+      if sl_result: logger.info(<span style="color:#2d5a3d;">"SL placed ✓"</span>)<br>
+      <span style="color:#1e4a30;"># sl_result=[] → False → тишина → 100 позиций без SL</span><br><br>
+      <span style="color:#1e4a30;"># Правильно:</span><br>
+      if not sl_id: raise Exception(<span style="color:#2d5a3d;">f"No SL: {resp!r}"</span>)
+    </div>
+  </div>
+
+  <div class="page-num">11</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 12 — CHAPTER 3 OPENER                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12" id="ch3">
+  <div class="illus" style="height:88mm;">
+    <div class="illus-icon">🐬</div>
+    <div class="illus-label">CHAPTER 3 — OPENING SPREAD</div>
+    <div class="illus-desc">
+      Площадь. Толпа роботов хвалит дельфинов.<br>
+      Один дельфин толкает робота к берегу. Все смотрят на это.<br>
+      Вопрос Гейта висит в воздухе: «А те кого толкали от берега?»<br>
+      Пустые места в толпе.
+    </div>
+  </div>
+
+  <div>
+    <div class="ch-number">// ГЛАВА 3</div>
+    <div class="ch-title">Ловушка<br>Дельфинов</div>
+    <div class="ch-concept">survivorship_bias · honest_statistics</div>
+  </div>
+
+  <!-- Easter egg: normal distribution -->
+  <div class="easter" style="bottom:20px;right:16px;text-align:right;">
+    N(μ, σ²)<br>
+    <span class="c"># распределение исходов</span><br>
+    <span class="c"># включая тех кого не видно</span>
+  </div>
+
+  <div class="page-num">12</div>
+</div>
+
+<!-- PAGE 13 — CHAPTER 3 STORY -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text" style="flex:1;">
+    <p>На главной площади собралась толпа.</p>
+    <p><span class="speech">— Дельфины спасают людей! — кричал один робот. — Они толкают утопающих к берегу!»</span></p>
+    <p><span class="speech">— Замечательные существа! — соглашался другой.</span></p>
+    <p>Максим слушал и думал: дельфины добрые. Всегда помогают.</p>
+    <p>Потом подошёл Мастер Гейт. Встал рядом. Молчал минуту.</p>
+    <p><span class="gate-speech">— А те кого дельфины толкали от берега — они здесь?</span></p>
+    <p>Максим оглянулся.</p>
+    <p>Никого.</p>
+  </div>
+
+  <div class="illus" style="height:50mm;">
+    <div class="illus-label">ILLUSTRATION: пустые места в толпе — силуэты отсутствующих</div>
+    <div class="illus-desc">Толпа роботов. Между ними — тёмные пустые пятна в форме роботов. Призраки тех кого нет.</div>
+  </div>
+
+  <div class="page-num">13</div>
+</div>
+
+<div class="page p20 flex-col gap12">
+  <div class="story-text">
+    <p><span class="gate-speech">— Вот именно, — сказал Гейт. — Выжившие рассказывают о победах. Проигравшие молчат. Иногда навсегда.</span></p>
+    <p>Максим достал свою статистику.</p>
+  </div>
+
+  <div class="stat-block">
+    <div class="stat-row"><span class="stat-label">Закрытых сделок:</span><span class="stat-val green">24</span></div>
+    <div class="stat-row"><span class="stat-label">Прибыльных:</span><span class="stat-val green">16</span></div>
+    <div class="stat-row"><span class="stat-label">Win Rate:</span><span class="stat-val green">67%  ← красиво</span></div>
+  </div>
+
+  <div class="story-text">
+    <p><span class="gate-speech">— А эти шесть позиций которые ещё открыты?</span></p>
+    <p><span class="speech">— Они... в минусе, — тихо сказал Максим.</span></p>
+    <p><span class="gate-speech">— А сигналы которые ты заблокировал — ты записал куда пошёл рынок?</span></p>
+    <p><span class="speech">— Нет.</span></p>
+    <p><span class="gate-speech">— Тогда твои 67% — это статистика выживших.</span></p>
+  </div>
+
+  <div class="stat-block" style="margin-top:4px;border-left:3px solid var(--red);">
+    <div class="stat-row"><span class="stat-label">Реальный Win Rate:</span><span class="stat-val red">43%</span></div>
+    <div class="stat-row"><span class="stat-label">Разница:</span><span class="stat-val red">−24 pp  (иллюзия)</span></div>
+  </div>
+
+  <div class="page-num">14</div>
+</div>
+
+<!-- PAGE 15 — CHAPTER 3 LESSON -->
+<div class="page p20 flex-col gap12">
+  <div class="illus" style="height:65mm;">
+    <div class="illus-label">ILLUSTRATION: Максим пересчитывает — добавляет призраков в список</div>
+    <div class="illus-desc">Максим за столом с книгой учёта. Рядом появляются полупрозрачные фигуры — пропущенные сделки. Гейт стоит и кивает.</div>
+  </div>
+
+  <div class="story-text" style="flex:1;">
+    <p>Максим взял новый лист бумаги.</p>
+    <p>Записал всех. Тех кто выиграл. Тех кто проиграл. Тех кого не было видно.</p>
+    <p><span class="gate-speech">— Теперь твоя статистика честная, — сказал Гейт.</span></p>
+  </div>
+
+  <div class="lesson">
+    <div class="lesson-label">// УРОК 3</div>
+    <div class="lesson-text">Считай всех. Не только тех кто выжил. Выжившие не рассказывают всю историю.</div>
+  </div>
+
+  <!-- Easter egg: normal distribution formula -->
+  <div style="border:1px solid #1e3a2f;border-radius:4px;padding:8px 12px;background:#050d08;margin-top:4px;">
+    <div style="font-family:var(--mono);font-size:8pt;color:#2a5540;line-height:2;text-align:center;">
+      N(μ, σ²)&nbsp;&nbsp;&nbsp;<span style="color:#1a3828;">← на стене таверны</span><br>
+      <span style="color:#1e4a30;font-size:7pt;"># распределение всех исходов, включая невидимых</span>
+    </div>
+  </div>
+
+  <div class="page-num">15</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 16 — CHAPTER 4 OPENER                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12" id="ch4">
+  <div class="illus" style="height:88mm;">
+    <div class="illus-icon">🛡️</div>
+    <div class="illus-label">CHAPTER 4 — OPENING SPREAD</div>
+    <div class="illus-desc">
+      Максим у двери. За спиной — Призрак Профита (дым, числа +340%).<br>
+      В проходе — Гейт со щитом. 5 чекбоксов на щите.<br>
+      Напряжение. Момент решения.
+    </div>
+  </div>
+
+  <div>
+    <div class="ch-number">// ГЛАВА 4</div>
+    <div class="ch-title">Правило<br>Гейта</div>
+    <div class="ch-concept">confluence_gate · value_of_no</div>
+  </div>
+
+  <!-- Easter egg on shield -->
+  <div class="easter" style="bottom:20px;right:16px;text-align:right;">
+    <span class="c"># на щите Мастера Гейта</span><br>
+    if score >= 4:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;allow_entry()<br>
+    <span class="c"># confluence threshold</span>
+  </div>
+
+  <div class="page-num">16</div>
+</div>
+
+<!-- PAGE 17 — CHAPTER 4 STORY -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text" style="flex:1;">
+    <p>Однажды утром Максим почувствовал: <strong>сейчас.</strong></p>
+    <p>Надо выйти. Немедленно. Рынок уже движется.</p>
+    <p>За спиной появился Призрак Профита.</p>
+    <p><span class="ghost-speech">— Все уже там, — прошептал он. — Ты опаздываешь. Последний шанс.</span></p>
+    <p>Максим побежал к двери.</p>
+    <p>В проходе стоял Мастер Гейт. Со своим щитом.</p>
+    <p><span class="gate-speech">— Стой, — сказал Гейт тихо.</span></p>
+  </div>
+
+  <div class="check-list" style="border:1px solid var(--border);border-radius:4px;padding:10px 12px;background:#0d1117;">
+    <li><span class="ck-y">✓</span><span><span class="ck-label">Большой ветер?</span>&nbsp;<span class="ck-sub">Macro Trend</span></span></li>
+    <li><span class="ck-y">✓</span><span><span class="ck-label">Объём растёт?</span>&nbsp;<span class="ck-sub">Volume</span></span></li>
+    <li><span class="ck-y">✓</span><span><span class="ck-label">Зона скидки?</span>&nbsp;<span class="ck-sub">PD Zone</span></span></li>
+    <li><span class="ck-n">✗</span><span><span class="ck-label">Ложный прорыв?</span>&nbsp;<span class="ck-sub">Trap Filter</span></span></li>
+    <li><span class="ck-n">✗</span><span><span class="ck-label">Факторов ≥ 4?</span>&nbsp;<span class="ck-sub">Confluence</span></span></li>
+  </div>
+
+  <div class="story-text">
+    <p><span class="gate-speech">— Три из пяти. Нужно четыре.</span></p>
+    <p><span class="speech">— Но Призрак говорит что уже поздно! — крикнул Максим.</span></p>
+  </div>
+
+  <div class="page-num">17</div>
+</div>
+
+<div class="page p20 flex-col gap12">
+  <div class="illus" style="height:60mm;">
+    <div class="illus-label">ILLUSTRATION: Гейт смотрит на Призрака — Призрак исчезает как дым</div>
+    <div class="illus-desc">Взгляд Гейта. Призрак рассыпается — числа (+340%, +200%) тают. Максим смотрит на пустое место где был Призрак.</div>
+  </div>
+
+  <div class="story-text" style="flex:1;">
+    <p>Гейт медленно повернулся к Призраку.</p>
+    <p>Призрак попятился. Растаял. Числа рассыпались в воздухе.</p>
+    <p><span class="gate-speech">— Он всегда говорит что поздно, — сказал Гейт. — Потому что живёт только когда ты торопишься.</span></p>
+    <p>Максим не вышел.</p>
+    <p>Через час рынок развернулся.</p>
+    <p>Те кто вышел — потеряли.</p>
+    <p>Максим смотрел на экраны других роботов. Потом на свой баланс.</p>
+    <p>Его баланс не изменился. Он не потерял ничего.</p>
+    <p>Но он ещё не понял — <strong>это и есть победа.</strong></p>
+  </div>
+
+  <div class="page-num">18</div>
+</div>
+
+<!-- PAGE 19 — CHAPTER 4 LESSON -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text" style="flex:1;">
+    <p><span class="gate-speech">— «Нет» — это самое дорогое слово в мире, — сказал Гейт.</span></p>
+    <p><span class="gate-speech">— Оно ничего не стоит когда его произносишь. И очень много — когда оказываешься правым.</span></p>
+    <p>Максим смотрел на щит. На пять вопросов. На мелкие значки по краю.</p>
+  </div>
+
+  <!-- Easter egg: score threshold -->
+  <div style="border:1px solid #1e3a2f;border-radius:4px;padding:8px 12px;background:#050d08;">
+    <div style="font-family:var(--mono);font-size:7.5pt;color:#2a5540;line-height:1.9;">
+      <span style="color:#1e4a30;"># Мелко, по краю щита Гейта</span><br>
+      CONFLUENCE_THRESHOLD = 4<br>
+      if score &lt; CONFLUENCE_THRESHOLD:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;ghost_log.record(symbol, side, score)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1e4a30;">raise</span> GateReject(<span style="color:#2d5a3d;">f"score {score} &lt; {CONFLUENCE_THRESHOLD}"</span>)
+    </div>
+  </div>
+
+  <div class="lesson">
+    <div class="lesson-label">// УРОК 4</div>
+    <div class="lesson-text">«Нет» — это самое дорогое слово в мире. Правильный отказ — тоже результат.</div>
+  </div>
+
+  <div class="page-num">19</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 20 — CHAPTER 5 OPENER                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12" id="ch5">
+  <div class="illus" style="height:88mm;">
+    <div class="illus-icon">📖</div>
+    <div class="illus-label">CHAPTER 5 — OPENING SPREAD</div>
+    <div class="illus-desc">
+      Максим и Гейт открывают большую тёмную книгу вместе.<br>
+      Из страниц поднимаются полупрозрачные призраки — сигналы которые не прошли.<br>
+      608 из них тают — они были бы убытками.<br>
+      Атмосфера: спокойная, вечерняя.
+    </div>
+  </div>
+
+  <div>
+    <div class="ch-number">// ГЛАВА 5</div>
+    <div class="ch-title">Книга<br>Призраков</div>
+    <div class="ch-concept">ghost_log · measuring_the_right_no</div>
+  </div>
+
+  <!-- Easter egg -->
+  <div class="easter" style="bottom:20px;right:16px;text-align:right;">
+    ghost_log.record(<br>
+    &nbsp;&nbsp;symbol, side,<br>
+    &nbsp;&nbsp;score, reason<br>
+    )
+  </div>
+
+  <div class="page-num">20</div>
+</div>
+
+<!-- PAGE 21 — CHAPTER 5 STORY -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text" style="flex:1;">
+    <p>После Главы 4 Максим начал вести Книгу Призраков.</p>
+    <p>Каждый раз когда Гейт говорил «нет» — Максим записывал:</p>
+    <ul style="list-style:none;padding-left:12px;margin:8px 0;">
+      <li style="margin-bottom:4px;">— что хотел сделать</li>
+      <li style="margin-bottom:4px;">— почему Гейт запретил</li>
+      <li>— по какой цене это было</li>
+    </ul>
+    <p>Через четыре часа он проверял: куда пошёл рынок?</p>
+    <p>Так продолжалось месяц.</p>
+  </div>
+
+  <div class="illus" style="height:62mm;">
+    <div class="illus-label">ILLUSTRATION: Максим пишет в книгу каждый вечер при свете монитора</div>
+    <div class="illus-desc">Максим за столом. Тёмная книга открыта. Строки данных. Монитор светит зелёным. Спокойная сцена.</div>
+  </div>
+
+  <div class="page-num">21</div>
+</div>
+
+<div class="page p20 flex-col gap12">
+  <div class="story-text">
+    <p>Через месяц они открыли Книгу вместе.</p>
+    <p>Гейт считал долго. Молча.</p>
+  </div>
+
+  <div class="stat-block">
+    <div class="stat-row"><span class="stat-label">Принято сигналов:</span><span class="stat-val green">94  из  847</span></div>
+    <div class="stat-row"><span class="stat-label">Заблокировано:</span><span class="stat-val">753</span></div>
+    <div class="stat-row"><span class="stat-label">Из них — ушли в минус:</span><span class="stat-val red">608  (81%)</span></div>
+    <div style="border-top:1px solid var(--border);margin:6px 0;"></div>
+    <div class="stat-row"><span class="stat-label">Защищено убытков:</span><span class="stat-val green">$1,847</span></div>
+    <div class="stat-row"><span class="stat-label">Win Rate принятых:</span><span class="stat-val green">61%</span></div>
+  </div>
+
+  <div class="story-text" style="margin-top:8px;">
+    <p><span class="gate-speech">— 81%, — сказал Гейт. — Это цена правильного «нет».</span></p>
+    <p><span class="speech">— Я не знал что ты так часто прав, — сказал Максим.</span></p>
+    <p><span class="gate-speech">— Теперь знаешь. Потому что записывал.</span></p>
+    <p>Максим смотрел на Книгу иначе.</p>
+    <p>Это не книга отказов.</p>
+    <p>Это <strong>книга спасений.</strong></p>
+  </div>
+
+  <div class="page-num">22</div>
+</div>
+
+<!-- PAGE 23 — CHAPTER 5 CODE + LESSON -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text">
+    <p>На странице Книги Максим увидел значки.</p>
+    <p>Теперь он понимал их немного лучше.</p>
+  </div>
+
+  <div style="border:1px solid #1e3a2f;border-radius:4px;padding:10px 12px;background:#050d08;">
+    <div style="font-family:var(--mono);font-size:7.5pt;color:#3a7055;line-height:1.9;">
+      <span style="color:#1e4a30;"># На странице Книги Призраков</span><br>
+      <span style="color:#2d5a3d;">timestamp</span> | symbol&nbsp; | side&nbsp; | score | reason<br>
+      03:14:21&nbsp; | ETHUSDT | LONG&nbsp; | 3/5&nbsp; | score &lt; threshold<br>
+      03:18:47&nbsp; | BTCUSDT | SHORT | 2/5&nbsp; | low confidence<br>
+      03:22:11&nbsp; | SOLUSDT | LONG&nbsp; | 3/5&nbsp; | trap detected<br>
+      <span style="color:#1e4a30;"># 4 часа спустя: все ушли в минус</span>
+    </div>
+  </div>
+
+  <div class="story-text" style="flex:1;">
+    <p><span class="gate-speech">— Ты не знаешь сколько денег ты не потерял, — сказал Гейт, — пока не начнёшь записывать.</span></p>
+  </div>
+
+  <div class="lesson">
+    <div class="lesson-label">// УРОК 5</div>
+    <div class="lesson-text">Ты не знаешь сколько денег ты НЕ потерял. Пока не начнёшь записывать. Книга Призраков — это книга спасений.</div>
+  </div>
+
+  <div class="page-num">23</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 24 — EPILOGUE OPENER                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12" id="epilog">
+  <div class="illus" style="height:80mm;">
+    <div class="illus-icon">🔑</div>
+    <div class="illus-label">EPILOGUE — FINAL SPREAD</div>
+    <div class="illus-desc">
+      Гейт открывает панель на груди. Достаёт металлический ключ.<br>
+      Максим смотрит — на экране груди впервые «GATE: 4/5 ✓» вместо «BUY».<br>
+      На стене за ними — формула K = p − (1−p)/R (едва видна).<br>
+      Тёплый зелёный glow. Момент передачи.
+    </div>
+  </div>
+
+  <div>
+    <div class="ch-number">// ЭПИЛОГ</div>
+    <div class="ch-title">Ключ от<br>Системы</div>
+  </div>
+
+  <div class="page-num">24</div>
+</div>
+
+<!-- PAGE 25 — EPILOGUE TEXT -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text" style="flex:1;">
+    <p>Прошло время.</p>
+    <p>Максим понял.</p>
+    <p>Торговля — это не угадывание.<br>
+    Это не скорость.<br>
+    Это не смелость.</p>
+    <p>Это система которая умеет говорить <strong>«нет»</strong>.<br>
+    Которая кричит когда что-то идёт не так.<br>
+    Которая записывает даже то что не произошло.</p>
+    <p>Призрак Профита ушёл.</p>
+    <p>Он не любит такие системы.</p>
+  </div>
+
+  <div class="illus" style="height:55mm;">
+    <div class="illus-label">ILLUSTRATION: Призрак Профита уходит вдаль — тает в темноте</div>
+    <div class="illus-desc">Силуэт Призрака удаляется. Числа (+340%, +200%) тают последними. Максим смотрит вслед — спокойно.</div>
+  </div>
+
+  <div class="page-num">25</div>
+</div>
+
+<!-- PAGE 26 — THE KEY -->
+<div class="page p20 flex-col gap12">
+  <div class="story-text">
+    <p>Гейт опустил щит.</p>
+    <p>Открыл панель на груди. Внутри лежал старый металлический ключ.</p>
+  </div>
+
+  <div class="key-box">
+    <div class="key-code">
+      SYSTEM.NEVER.SLEEPS<br>
+      uptime: 99.97%<br>
+      <span style="font-size:8pt;color:var(--dim);">// since first deploy</span>
+    </div>
+  </div>
+
+  <div class="story-text" style="flex:1;margin-top:8px;">
+    <p><span class="gate-speech">— Эта система не спит когда ты спишь.</span></p>
+    <p><span class="gate-speech">— Она записывает пока ты молчишь.</span></p>
+    <p><span class="gate-speech">— Она кричит пока ты не слышишь.</span></p>
+    <p><span class="gate-speech">— Теперь она твоя.</span></p>
+    <p>Максим взял ключ.</p>
+    <p>На экране его груди впервые появилось не <span style="color:var(--red);font-family:var(--mono);">BUY</span> —</p>
+  </div>
+
+  <div style="background:#0d1a10;border:1px solid #1e4a2a;border-radius:6px;padding:14px;text-align:center;">
+    <div style="font-family:var(--mono);font-size:16pt;color:var(--green);" class="glow-green">
+      GATE: 4/5 ✓
+    </div>
+  </div>
+
+  <div class="page-num">26</div>
+</div>
+
+<!-- PAGE 27 — FINAL PAGE WITH KELLY EASTER EGG -->
+<div class="page p20 flex-col gap12">
+  <div class="illus" style="height:70mm;">
+    <div class="illus-label">ILLUSTRATION: Максим и Гейт — финальный кадр. Рассвет.</div>
+    <div class="illus-desc">Оба смотрят вперёд. На горизонте — рынок. Ключ у Максима в руке. Щит у Гейта. Первый зелёный свет рассвета.</div>
+  </div>
+
+  <div style="flex:1;">
+    <div style="font-family:var(--serif);font-size:11pt;color:var(--dim);font-style:italic;line-height:1.7;text-align:center;padding:0 8px;">
+      «Бот выживает не потому что у него хорошая стратегия.<br>
+      Бот выживает потому что он правильно реагирует<br>
+      когда стратегия встречает реальность.»
+    </div>
+  </div>
+
+  <!-- FINAL EASTER EGG: Kelly Criterion -->
+  <div style="border:1px solid #1e3a2f;border-radius:4px;padding:8px 12px;background:#050d08;">
+    <div style="font-family:var(--mono);font-size:8pt;color:#3a7055;line-height:2;text-align:center;">
+      K = p − (1−p) / R<br>
+      <span style="font-size:7pt;color:#1e4a30;">p = win_rate &nbsp;·&nbsp; R = avg_win / avg_loss</span><br>
+      <span style="font-size:7pt;color:#1a3828;"># Критерий Келли. На стене за Максимом.</span>
+    </div>
+  </div>
+
+  <div class="page-num">27</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 28 — BACK MATTER / CTA                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page p20 flex-col gap12" style="justify-content:space-between;">
+  <div>
+    <div style="font-family:var(--mono);font-size:8pt;color:var(--dim);margin-bottom:12px;">// если хочешь глубже</div>
+    <div style="font-family:var(--serif);font-size:14pt;font-weight:700;margin-bottom:8px;">Инструменты из книги</div>
+    <hr class="divider">
+  </div>
+
+  <div class="flex-col gap12" style="flex:1;">
+    <div class="code-block" style="border-left-color:var(--green);">
+      <div><span class="cm"># ghost_log.py — запись отклонённых сигналов</span></div>
+      <div><span class="kw">from</span> core.ghost_log <span class="kw">import</span> ghost_log</div>
+      <div>ghost_log.record(symbol, side, score, reason)</div>
+    </div>
+
+    <div class="code-block" style="border-left-color:var(--amber);">
+      <div><span class="cm"># split_validator.py — проверка на look-ahead bias</span></div>
+      <div>python3 split_validator.py --file features.csv</div>
+    </div>
+
+    <div class="code-block" style="border-left-color:var(--blue);">
+      <div><span class="cm"># calculate_optimal_risk.py — критерий Келли</span></div>
+      <div>python3 scripts/calculate_optimal_risk.py</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:16px;border:1px solid var(--border);border-radius:6px;background:var(--card);">
+    <div style="font-family:var(--mono);font-size:9pt;color:var(--green);margin-bottom:4px;">beyondthesignal.io</div>
+    <div style="font-family:var(--serif);font-size:10pt;color:var(--dim);">Архитектура которая выживает.<br>Level 0 — бесплатно.</div>
+  </div>
+
+  <div style="height:3px;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));border-radius:2px;"></div>
+</div>
+
+</body>
+</html>
