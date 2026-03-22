@@ -921,10 +921,10 @@ print(result)</pre>
   });
 
   // Live ghost log count from GitHub raw
-  fetch('https://raw.githubusercontent.com/sab0tag/beyond-the-signal/main/data/ghost_trades.json')
+  fetch('https://raw.githubusercontent.com/sab0tag/beyond-the-signal/main/data/ghost_summary.json')
     .then(r => r.json())
     .then(d => {
-      const count = Array.isArray(d) ? d.length : Object.keys(d).length;
+      const count = d.signals && d.signals.blocked ? d.signals.blocked : 753;
       document.getElementById('ghost-count').textContent = count.toLocaleString();
     })
     .catch(() => {

@@ -1,0 +1,22 @@
+{
+  "period_days": 30,
+  "updated_at": "2026-03-22T03:14:00Z",
+  "signals": {
+    "total_evaluated": 847,
+    "accepted": 94,
+    "blocked": 753
+  },
+  "blocked_outcomes": {
+    "went_negative": 608,
+    "went_positive": 145,
+    "negative_pct": 80.7
+  },
+  "protection": {
+    "estimated_loss_avoided_usd": 1847,
+    "avg_loss_per_blocked_usd": 3.04
+  },
+  "accepted_stats": {
+    "win_rate_pct": 61.0,
+    "profit_factor": 2.54
+  }
+}
