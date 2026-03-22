@@ -216,8 +216,17 @@
     font-size: 8pt;
     color: var(--dim);
     text-align: center;
-    padding: 6px 0 8px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 5px 0 7px;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    pointer-events: none;
   }
+  /* Compensate for absolute page-num so content doesn't underlap */
+  .page.p20 { padding-bottom: 24px; }
+  .page.p24 { padding-bottom: 24px; }
 
   /* ── STAT BLOCK ─────────────────────────────────── */
   .stat-block {
