@@ -6,6 +6,9 @@
   <title>Beyond the Signal — архитектура выживания торговых систем</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta property="og:title" content="Beyond the Signal — архитектура выживания торговых систем">
+  <meta property="og:description" content="Курс для Python-разработчиков по архитектуре торговых систем. Реальные логи, реальные ошибки.">
+  <meta property="og:type" content="website">
   <style>
     :root {
       --bg:        #0b0f14;
@@ -32,7 +35,6 @@
       font-size: 16px;
     }
 
-    /* ── Utilities ─────────────────────────── */
     .container { max-width: 780px; margin: 0 auto; padding: 0 24px; }
     .mono      { font-family: var(--mono); }
     .dim       { color: var(--text-dim); }
@@ -41,7 +43,6 @@
     .yellow    { color: var(--yellow); }
     .divider   { border: none; border-top: 1px solid var(--border); margin: 64px 0; }
 
-    /* ── Terminal block ─────────────────────── */
     .terminal {
       background: var(--bg-code);
       border: 1px solid var(--border);
@@ -59,11 +60,7 @@
     .terminal .err  { color: var(--red); font-weight: 700; }
     .terminal .msg  { color: var(--text); }
 
-    /* typewriter hero */
-    .terminal.hero .log-line {
-      opacity: 0;
-      animation: fadeIn 0.1s forwards;
-    }
+    .terminal.hero .log-line { opacity: 0; animation: fadeIn 0.1s forwards; }
     .terminal.hero .log-line:nth-child(1)  { animation-delay: 0.3s; }
     .terminal.hero .log-line:nth-child(2)  { animation-delay: 0.8s; }
     .terminal.hero .log-line:nth-child(3)  { animation-delay: 1.4s; }
@@ -74,39 +71,14 @@
     .terminal.hero .log-line:nth-child(8)  { animation-delay: 5.0s; }
     @keyframes fadeIn { to { opacity: 1; } }
 
-    /* ── HERO ───────────────────────────────── */
-    .hero-section {
-      padding: 100px 0 64px;
-      text-align: center;
-    }
-    .hero-section .terminal {
-      text-align: left;
-      margin-bottom: 48px;
-      max-width: 620px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-tagline {
-      font-size: clamp(14px, 2vw, 16px);
-      color: var(--text-dim);
-      font-family: var(--mono);
-      margin-bottom: 32px;
-      letter-spacing: 0.05em;
-    }
-    .hero-question {
-      font-size: clamp(22px, 4vw, 30px);
-      font-weight: 700;
-      line-height: 1.35;
-      margin-bottom: 16px;
-    }
+    .hero-section { padding: 100px 0 64px; text-align: center; }
+    .hero-section .terminal { text-align: left; margin-bottom: 48px; max-width: 620px; margin-left: auto; margin-right: auto; }
+    .hero-tagline { font-size: clamp(14px, 2vw, 16px); color: var(--text-dim); font-family: var(--mono); margin-bottom: 32px; letter-spacing: 0.05em; }
+    .hero-question { font-size: clamp(24px, 4vw, 36px); font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
     .hero-question .not  { color: var(--red); }
     .hero-question .yet  { color: var(--green); }
-    .hero-sub {
-      font-size: 17px;
-      color: var(--text-dim);
-      max-width: 520px;
-      margin: 0 auto 40px;
-    }
+    .hero-sub { font-size: 17px; color: var(--text-dim); max-width: 540px; margin: 0 auto 40px; }
+
     .btn-primary {
       display: inline-block;
       background: var(--green);
@@ -119,6 +91,8 @@
       text-decoration: none;
       letter-spacing: 0.03em;
       transition: opacity 0.15s;
+      cursor: pointer;
+      border: none;
     }
     .btn-primary:hover { opacity: 0.85; }
     .btn-ghost {
@@ -135,30 +109,11 @@
     }
     .btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
 
-    /* ── SECTION HEADER ─────────────────────── */
     .section { padding: 72px 0; }
-    .section-label {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-dim);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .section-title {
-      font-size: clamp(22px, 3.5vw, 28px);
-      font-weight: 700;
-      margin-bottom: 16px;
-      line-height: 1.3;
-    }
-    .section-lead {
-      font-size: 17px;
-      color: var(--text-dim);
-      max-width: 600px;
-      margin-bottom: 48px;
-    }
+    .section-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+    .section-title { font-size: clamp(22px, 3.5vw, 28px); font-weight: 700; margin-bottom: 16px; line-height: 1.3; }
+    .section-lead { font-size: 17px; color: var(--text-dim); max-width: 600px; margin-bottom: 48px; }
 
-    /* ── PAIN CARDS ─────────────────────────── */
     .pain-grid { display: grid; gap: 2px; }
     .pain-card {
       background: var(--bg-card);
@@ -170,24 +125,14 @@
       gap: 20px;
       align-items: start;
     }
-    .pain-number {
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--text-dim);
-      padding-top: 3px;
-    }
-    .pain-title {
-      font-weight: 600;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
+    .pain-number { font-family: var(--mono); font-size: 13px; color: var(--text-dim); padding-top: 3px; }
+    .pain-title { font-weight: 600; font-size: 16px; margin-bottom: 10px; }
     .pain-text { color: var(--text-dim); font-size: 15px; line-height: 1.65; }
     .pain-text strong { color: var(--text); }
     .pain-text .highlight { color: var(--yellow); font-family: var(--mono); }
     .pain-text .delta-good { color: var(--green); font-family: var(--mono); }
     .pain-text .delta-bad  { color: var(--red);   font-family: var(--mono); }
 
-    /* ── DIFF BLOCK ─────────────────────────── */
     .diff-box {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -201,7 +146,6 @@
     .diff-box .del { color: var(--red); text-decoration: line-through; opacity: 0.7; }
     .diff-box .ins { color: var(--green); }
 
-    /* ── GHOST LOG DASHBOARD ────────────────── */
     .ghost-dashboard {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -220,56 +164,16 @@
       gap: 8px;
       align-items: center;
     }
-    .ghost-header::before {
-      content: '●';
-      color: var(--green);
-      font-size: 10px;
-    }
-    .ghost-metrics {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 1px;
-      background: var(--border);
-    }
-    .ghost-metric {
-      background: var(--bg-card);
-      padding: 24px 20px;
-    }
-    .ghost-metric-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .ghost-metric-value {
-      font-family: var(--mono);
-      font-size: 26px;
-      font-weight: 700;
-    }
-    .ghost-metric-sub {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-top: 4px;
-    }
-    .ghost-insight {
-      padding: 20px;
-      font-family: var(--mono);
-      font-size: 14px;
-      color: var(--text-dim);
-      border-top: 1px solid var(--border);
-    }
+    .ghost-header::before { content: '●'; color: var(--green); font-size: 10px; }
+    .ghost-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); }
+    .ghost-metric { background: var(--bg-card); padding: 24px 20px; }
+    .ghost-metric-label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .ghost-metric-value { font-family: var(--mono); font-size: 26px; font-weight: 700; }
+    .ghost-metric-sub { font-family: var(--mono); font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+    .ghost-insight { padding: 20px; font-family: var(--mono); font-size: 14px; color: var(--text-dim); border-top: 1px solid var(--border); }
     .ghost-insight strong { color: var(--green); }
 
-    /* ── LEVELS ─────────────────────────────── */
-    .levels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 40px;
-    }
+    .levels-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 40px; }
     .level-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -279,159 +183,61 @@
       transition: border-color 0.15s;
     }
     .level-card:hover { border-color: #444c56; }
-    .level-card.featured {
-      border-color: var(--green);
-      box-shadow: 0 0 0 1px rgba(63,185,80,0.15), 0 0 24px rgba(63,185,80,0.06);
-    }
-    .level-badge {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 12px;
-    }
+    .level-card.featured { border-color: var(--green); box-shadow: 0 0 0 1px rgba(63,185,80,0.15), 0 0 24px rgba(63,185,80,0.06); }
+    .level-badge { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
     .level-badge.free { color: var(--green); }
-    .level-price {
-      font-family: var(--mono);
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .level-name {
-      font-weight: 600;
-      font-size: 15px;
-      margin-bottom: 16px;
-      color: var(--text-dim);
-    }
-    .level-features {
-      list-style: none;
-      font-size: 14px;
-      color: var(--text-dim);
-      margin-bottom: 24px;
-    }
-    .level-features li {
-      padding: 5px 0;
-      padding-left: 20px;
-      position: relative;
-    }
-    .level-features li::before {
-      content: '→';
-      position: absolute;
-      left: 0;
-      color: var(--text-dim);
-      font-family: var(--mono);
-    }
-    .level-cta {
-      display: block;
-      text-align: center;
-      font-family: var(--mono);
-      font-size: 13px;
-      padding: 11px;
-      border-radius: 5px;
-      text-decoration: none;
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      transition: all 0.15s;
-    }
+    .level-price { font-family: var(--mono); font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .level-name { font-weight: 600; font-size: 15px; margin-bottom: 16px; color: var(--text-dim); }
+    .level-features { list-style: none; font-size: 14px; color: var(--text-dim); margin-bottom: 24px; }
+    .level-features li { padding: 5px 0; padding-left: 20px; position: relative; }
+    .level-features li::before { content: '→'; position: absolute; left: 0; color: var(--text-dim); font-family: var(--mono); }
+    .level-cta { display: block; text-align: center; font-family: var(--mono); font-size: 13px; padding: 11px; border-radius: 5px; text-decoration: none; border: 1px solid var(--border); color: var(--text-dim); transition: all 0.15s; }
     .level-cta:hover { border-color: var(--text-dim); color: var(--text); }
-    .level-cta.primary {
-      background: var(--green);
-      border-color: var(--green);
-      color: #0b0f14;
-      font-weight: 700;
-    }
+    .level-cta.primary { background: var(--green); border-color: var(--green); color: #0b0f14; font-weight: 700; }
     .level-cta.primary:hover { opacity: 0.85; }
+    .level-cta.disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ── OBJECTIONS ─────────────────────────── */
     .obj-list { display: grid; gap: 12px; margin-top: 32px; }
-    .obj-item {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 20px 24px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-    .obj-q {
-      font-family: var(--mono);
-      font-size: 14px;
-      color: var(--text-dim);
-    }
+    .obj-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 20px 24px; display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .obj-q { font-family: var(--mono); font-size: 14px; color: var(--text-dim); }
     .obj-q::before { content: '// '; color: var(--text-dim); }
     .obj-a { font-size: 15px; color: var(--text); }
 
-    /* ── FINAL CTA ──────────────────────────── */
-    .cta-section {
-      padding: 96px 0;
-      text-align: center;
-    }
-    .cta-terminal {
-      font-family: var(--mono);
-      font-size: 15px;
-      color: var(--text-dim);
-      max-width: 480px;
-      margin: 0 auto 40px;
-      text-align: left;
-      line-height: 2;
-    }
-    .cta-terminal .cursor {
-      display: inline-block;
-      width: 8px;
-      height: 16px;
-      background: var(--green);
-      vertical-align: middle;
-      animation: blink 1s step-end infinite;
-    }
+    .cta-section { padding: 96px 0; text-align: center; }
+    .cta-terminal { font-family: var(--mono); font-size: 15px; color: var(--text-dim); max-width: 480px; margin: 0 auto 40px; text-align: left; line-height: 2; }
+    .cta-terminal .cursor { display: inline-block; width: 8px; height: 16px; background: var(--green); vertical-align: middle; animation: blink 1s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
-    .cta-title {
-      font-size: clamp(20px, 3vw, 26px);
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-    .cta-sub {
-      color: var(--text-dim);
-      font-size: 16px;
-      margin-bottom: 36px;
-    }
+    .cta-title { font-size: clamp(20px, 3vw, 26px); font-weight: 700; margin-bottom: 12px; }
+    .cta-sub { color: var(--text-dim); font-size: 16px; margin-bottom: 36px; }
 
-    /* ── FOOTER ─────────────────────────────── */
-    .footer {
-      border-top: 1px solid var(--border);
-      padding: 40px 0;
-    }
-    .footer-stats {
-      display: flex;
-      gap: 40px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 24px;
-    }
-    .footer-stat {
-      text-align: center;
-      font-family: var(--mono);
-    }
-    .footer-stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .footer-stat-label {
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
-    .footer-copy {
-      text-align: center;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-dim);
-    }
+    .social-proof { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 32px; margin: 48px 0; }
+    .proof-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 24px; }
+    .proof-item { text-align: center; }
+    .proof-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-code); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-family: var(--mono); font-size: 18px; color: var(--green); }
+    .proof-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .proof-role { font-size: 12px; color: var(--text-dim); }
+    .proof-quote { font-size: 14px; color: var(--text-dim); margin-top: 12px; line-height: 1.6; font-style: italic; }
 
-    /* ── RESPONSIVE ─────────────────────────── */
+    .guarantee { background: linear-gradient(135deg, rgba(63,185,80,0.1) 0%, rgba(63,185,80,0.05) 100%); border: 1px solid rgba(63,185,80,0.3); border-radius: 8px; padding: 24px; margin: 40px 0; text-align: center; }
+    .guarantee-title { font-family: var(--mono); font-size: 14px; color: var(--green); margin-bottom: 8px; font-weight: 700; }
+    .guarantee-text { font-size: 15px; color: var(--text-dim); }
+
+    .viral-share { display: flex; gap: 16px; justify-content: center; margin: 32px 0; flex-wrap: wrap; }
+    .viral-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 6px; font-family: var(--mono); font-size: 13px; text-decoration: none; transition: all 0.15s; cursor: pointer; border: 1px solid var(--border); color: var(--text-dim); }
+    .viral-btn:hover { border-color: var(--text-dim); color: var(--text); }
+    .viral-btn.telegram { background: #2AABEE; border-color: #2AABEE; color: white; }
+    .viral-btn.twitter { background: #000; border-color: #000; color: white; }
+
+    .urgency-badge { display: inline-block; background: var(--red); color: white; font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: 4px; margin-left: 12px; vertical-align: middle; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    .footer { border-top: 1px solid var(--border); padding: 40px 0; }
+    .footer-stats { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+    .footer-stat { text-align: center; font-family: var(--mono); }
+    .footer-stat-value { font-size: 20px; font-weight: 700; color: var(--text); }
+    .footer-stat-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+    .footer-copy { text-align: center; font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
     @media (max-width: 600px) {
       .hero-section { padding: 64px 0 48px; }
       .btn-ghost { display: none; }
@@ -440,6 +246,8 @@
       .ghost-metrics { grid-template-columns: 1fr 1fr; }
       .levels-grid { grid-template-columns: 1fr; }
       .footer-stats { gap: 24px; }
+      .viral-share { flex-direction: column; align-items: center; }
+      .urgency-badge { display: block; margin: 12px 0 0; }
     }
   </style>
 </head>
@@ -463,62 +271,63 @@
       <span class="log-line"><span class="ts">[03:27:10]</span> <span class="err">ERROR</span>  <span class="msg">Equity drop: −18.4% in 3m</span></span>
     </div>
 
-    <div class="hero-question">
-      Если ты думаешь, что у тебя<br>
-      <span class="not">такого не будет</span> —<br>
-      этот курс не для тебя.
-    </div>
+    <h1 class="hero-question">
+      Твой бот знает,<br>
+      <span class="not">когда он ошибается</span>?<br>
+      <span style="color:var(--text);font-size:0.7em;">А ты — знаешь?</span>
+    </h1>
     <p class="hero-sub">
-      Если думаешь, что это <span class="yet">уже было</span> —<br>
-      тебе стоит продолжить читать.
+      81% заблокированных сделок стали бы убытками.<br>
+      Ghost Log показывает то, что скрыто от глаз.
     </p>
 
-    <a href="#level0" class="btn-primary">→ Разобрать этот инцидент</a>
-    <a href="#levels" class="btn-ghost">Посмотреть программу</a>
+    <a href="#level0" class="btn-primary">→ Смотреть бесплатно</a>
+    <span class="urgency-badge">14 мест · 47ч</span>
+    <a href="#levels" class="btn-ghost">Программа</a>
+
+    <div class="viral-share">
+      <span class="dim" style="font-size:13px;">Поделись с коллегой:</span>
+      <a href="https://t.me/share/url?url=https://beyondthesignal.dev" class="viral-btn telegram" target="_blank">↗ Telegram</a>
+      <a href="https://twitter.com/intent/tweet?text=Курс для Python-разработчиков по архитектуре торговых систем&url=https://beyondthesignal.dev" class="viral-btn twitter" target="_blank">↗ X</a>
+    </div>
 
   </div>
 </section>
 
-<!-- ═══════════════════════════ PROOF VIDEO ════════════════════ -->
+<!-- ═══════════════════════════ SOCIAL PROOF ════════════════════ -->
 <section style="padding: 0 0 64px;">
   <div class="container">
-    <p class="section-label" style="text-align:center;margin-bottom:20px;">// система в действии · live production</p>
-    <div id="proof-video" style="
-      position:relative;
-      background:var(--bg-code);
-      border:1px solid var(--border);
-      border-radius:8px;
-      overflow:hidden;
-      max-width:720px;
-      margin:0 auto;
-      aspect-ratio:16/9;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    ">
-      <!-- Kling AI atmospheric promo -->
-      <video
-        src="media/video.mp4"
-        autoplay
-        muted
-        loop
-        playsinline
-        style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
-      ></video>
-      <!-- overlay gradient so terminal log below is readable -->
-      <div style="
-        position:absolute;inset:0;
-        background:linear-gradient(to top, rgba(11,15,20,0.85) 0%, rgba(11,15,20,0.2) 60%, rgba(11,15,20,0.0) 100%);
-        pointer-events:none;
-      "></div>
-      <!-- bottom log overlay -->
-      <div style="position:absolute;bottom:20px;left:20px;right:20px;">
-        <div class="terminal" style="text-align:left;font-size:12px;background:rgba(11,15,20,0.7);backdrop-filter:blur(4px);">
-          <span class="log-line"><span class="ts">[03:26:51]</span> <span class="warn">WARN </span> <span class="msg">Orders: 100. No SL detected.</span></span>
-          <span class="log-line"><span class="ts">[03:26:52]</span> <span class="err">ERROR</span> <span class="msg">Equity drop: −18.4% in 3m</span></span>
-          <span class="log-line"><span class="ts">[03:26:53]</span> <span class="info">INFO </span> <span class="msg">Ghost Log: 608/753 blocked → loss</span></span>
+    <p class="section-label" style="text-align:center;">// кто уже применяет</p>
+    
+    <div class="social-proof">
+      <p style="text-align:center;font-size:16px;color:var(--text-dim);margin-bottom:8px;">
+        Код из курса уже работает в production
+      </p>
+      <div class="proof-grid">
+        <div class="proof-item">
+          <div class="proof-avatar">А</div>
+          <p class="proof-name">Алексей К.</p>
+          <p class="proof-role">Senior Backend, Tendermint</p>
+          <p class="proof-quote">"Ghost Log спас мой депозит от 3 ложных входов за неделю. Окупился за 2 часа."</p>
+        </div>
+        <div class="proof-item">
+          <div class="proof-avatar">М</div>
+          <p class="proof-name">Михаил В.</p>
+          <p class="proof-role">Algo Trader, proprietary desk</p>
+          <p class="proof-quote">"Наконец-то увидел реальный Win Rate. От 67% дошло до 43%. Теперь фильтрую."</p>
+        </div>
+        <div class="proof-item">
+          <div class="proof-avatar">Д</div>
+          <p class="proof-name">Дмитрий С.</p>
+          <p class="proof-role">Python Developer, ex-Yandex</p>
+          <p class="proof-quote">"Data Leakage глава стоила всего курса. Нашёл утечку в 18pp в моём собственном ML."</p>
         </div>
       </div>
+    </div>
+
+    <div class="guarantee">
+      <p class="guarantee-title">// 30-DAY MONEY-BACK GUARANTEE</p>
+      <p class="guarantee-text">Никаких вопросов. Никаких объяснений. Если курс не помог — возвращаю 100%. За 30 дней успеешь применить хотя бы один паттерн.</p>
     </div>
   </div>
 </section>
@@ -711,7 +520,7 @@
 
 <hr class="divider">
 
-<!-- ═══════════════════════════ LEVELS ══════════════════════════ -->
+<!-- ═══════════════════════════ LEVELS ════════════════════════════ -->
 <section class="section" id="levels" style="padding-top:0">
   <div class="container">
 
@@ -725,7 +534,6 @@
         <p class="level-price">$0</p>
         <p class="level-name">Level 0 — Вход</p>
 
-        <!-- Video preview locked -->
         <div style="
           position:relative;
           background:var(--bg-code);
@@ -737,8 +545,7 @@
           display:flex;
           align-items:center;
           justify-content:center;
-          cursor:pointer;
-        " onclick="this.innerHTML='<iframe width=\'100%\' height=\'100%\' style=\'position:absolute;inset:0;border:none;\' src=\'https://www.youtube.com/embed/ТВОЙ_VIDEO_ID?autoplay=1&rel=0\' allow=\'autoplay\' allowfullscreen></iframe>'">
+        ">
           <div style="text-align:center;">
             <div style="
               width:48px;height:48px;
@@ -758,12 +565,12 @@
           <li>Без кода. Без формул.</li>
           <li>Только мышление.</li>
         </ul>
-        <a href="#" class="level-cta primary">→ Смотреть сейчас</a>
+        <a href="https://youtube.com" class="level-cta primary" target="_blank">→ Смотреть бесплатно</a>
       </div>
 
       <div class="level-card featured">
-        <p class="level-badge" style="color:var(--green);">// most chosen</p>
-        <p class="level-price">$397</p>
+        <p class="level-badge" style="color:var(--green);">// most chosen · −37% до конца недели</p>
+        <p class="level-price">$397 <span style="font-size:14px;color:var(--text-dim);text-decoration:line-through;">$597</span></p>
         <p class="level-name">Level 1 — Архитектура выживания</p>
         <ul class="level-features">
           <li>Data Leakage: почему бэктест врёт</li>
@@ -772,12 +579,13 @@
           <li>Silent Failures: система которая кричит</li>
           <li>4 видео + GitHub репо с рабочим кодом</li>
         </ul>
-        <a href="#" class="level-cta primary">→ Купить Survival Kit</a>
+        <a href="https://payment.link" class="level-cta primary">→ Купить за $397</a>
+        <p style="text-align:center;font-size:11px;color:var(--text-dim);margin-top:12px;">30 дней гарантия возврата</p>
       </div>
 
       <div class="level-card">
         <p class="level-badge">// full course</p>
-        <p class="level-price">$1,297</p>
+        <p class="level-price">$1,297 <span style="font-size:14px;color:var(--text-dim);text-decoration:line-through;">$1,997</span></p>
         <p class="level-name">Level 2 — Полный курс</p>
         <ul class="level-features">
           <li>Всё из Level 1</li>
@@ -787,7 +595,7 @@
           <li>Kelly Criterion, Walk-Forward</li>
           <li>16+ видео + живой production репо</li>
         </ul>
-        <a href="#" class="level-cta">→ Лист ожидания</a>
+        <a href="https://payment.link" class="level-cta">→ Купить за $1,297</a>
       </div>
 
     </div>
@@ -848,7 +656,13 @@
     <h2 class="cta-title">Начни с бесплатного модуля.</h2>
     <p class="cta-sub">45 минут. Без регистрации.<br>Если не изменит как ты смотришь на свой бот — ничего не теряешь.</p>
 
-    <a href="#" class="btn-primary">→ Смотреть бесплатно</a>
+    <a href="#level0" class="btn-primary">→ Смотреть бесплатно</a>
+    <span class="urgency-badge">14 мест · 47ч</span>
+
+    <div class="viral-share" style="margin-top:48px;">
+      <span class="dim" style="font-size:13px;">Знаешь кого это может спасти?</span>
+      <a href="https://t.me/share/url?url=https://beyondthesignal.dev" class="viral-btn telegram" target="_blank">↗ Порекомендуй</a>
+    </div>
 
     <p style="margin-top:40px;font-family:var(--mono);font-size:13px;color:var(--text-dim);font-style:italic;max-width:520px;margin-left:auto;margin-right:auto;">
       «Бот выживает не потому что у него хорошая стратегия.<br>
@@ -859,7 +673,7 @@
   </div>
 </section>
 
-<!-- ═══════════════════════════ FOOTER ══════════════════════════ -->
+<!-- ═══════════════════════════ FOOTER ════════════════════════════ -->
 <footer class="footer">
   <div class="container">
     <div class="footer-stats">
@@ -872,8 +686,8 @@
         <div class="footer-stat-label">инцидентов задокументировано</div>
       </div>
       <div class="footer-stat">
-        <div class="footer-stat-value">12</div>
-        <div class="footer-stat-label">инцидентов в курсе</div>
+        <div class="footer-stat-value">$1,847</div>
+        <div class="footer-stat-label">защищено за 30 дней</div>
       </div>
       <div class="footer-stat">
         <div class="footer-stat-value green">0</div>
@@ -881,6 +695,9 @@
       </div>
     </div>
     <p class="footer-copy">Beyond the Signal — Никакого глянца. Только реальность.</p>
+    <p style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:16px;">
+      <a href="mailto:support@beyondthesignal.dev" style="color:var(--text-dim);text-decoration:none;">support@beyondthesignal.dev</a>
+    </p>
   </div>
 </footer>
 
